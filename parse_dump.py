@@ -8,12 +8,21 @@ Created on Thu Sep  7 17:05:05 2023
 import re
 import mwxml
 import mwparserfromhell
+from nltk.tokenize import sent_tokenize
+import pandas as pd
+from langdetect import detect
+from langdetect.lang_detect_exception import LangDetectException
 
 RE_BOLD = re.compile(r"'''(.*?)'''",re.MULTILINE | re.IGNORECASE)
+
 
 def process_dump(dump, path):
   for page in dump:
       yield page
+
+dump_path = r'H:/Alon/wikipedia_util/hewiki-latest-pages-articles.xml.bz2'
+paths = [dump_path]
+dump_gen = mwxml.map(process_dump, paths)
 
 def extract_rev_first_para(rev_text):
     """        
@@ -63,17 +72,77 @@ def clean_xml_string(xml_string):
     return invalid_char_pattern.sub('', xml_string)
         
 def main():
-  dump_path = r'/Users/aloncohen/Documents/wikipedia_util/Documentswikipedia_util'
-  paths = [dump_path]
-  dump_gen = mwxml.map(process_dump, paths)
-  for page in dump_gen:
-      if 'מרלן דיטריך' in page.title:
-          print('***',page.title)
-          first_para_lines = extract_page_first_para(page)
-          print('***BOLD:',extract_first_first_bold_span_from_1st_sent(first_para_lines))          
-          print('***', first_para_lines)          
-          break
-      
+    data_frames = []  # Create a list to store DataFrames
+        
+    for index, page in enumerate(dump_gen):
+        print('***',page.title)
+        page_wikicode = extract_page_wikicode(page)
+        page_sentences = extract_sentences_from_wikicode (page_wikicode)
+        """
+        print (len(page_sentences))
+        count =0
+        for item in page_sentences:
+            if detect(item) == 'he':
+                count = count +1
+        print (count)
+        break    
+            """
+        data_frames.append(pd.DataFrame({'HE_sentences': page_sentences}))
+                
+        if index >100:
+            break
+    sentences_df = pd.concat(data_frames, ignore_index=True)
+    return sentences_df    
 
+def extract_sentences_from_wikicode (wiki_text):
+     wikicode = mwparserfromhell.parse(wiki_text)
+     text = str(wikicode.strip_code())
+     
+     lines = text.split('\n')
+     sentences = []
+     for line in lines:
+         sentences.extend(sent_tokenize(line))
+      
+     sentences = [sentence for sentence in sentences if '|' not in sentence]
+     return sentences 
+
+def extract_page_wikicode(page):    
+    page_wikicode = None
+    if page.redirect: # Do not process redirect pages for now
+        return page_wikicode
+    
+    for rev in page: # hopefull only a single revision, as we exported only latest version                
+        page_wikicode = mwparserfromhell.parse(rev.text)
+        break
+    return page_wikicode          
+
+def filter_sentences_df (df):
+   # filter the length of the sentences (between 4-30 words)
+   df['word_count'] = df['HE_sentences'].apply(lambda x: count_words(x))
+   len_filtered_df = df.query('word_count > 3 and word_count < 31').copy()
+   
+   #filter the df to only hebrew sentences
+   len_filtered_df['sen_lang'] = len_filtered_df['HE_sentences'].apply(lambda x: detect_lang(x))
+   He_filtered_df = len_filtered_df.query("sen_lang == 'he'")
+  
+   return He_filtered_df
+    
+def count_words(cell_content):
+    words = cell_content.split()
+    return len(words)    
+
+def detect_lang (cell_content):
+    try:
+        return detect(cell_content)
+    except LangDetectException:
+        return 'unknown'
+    
 if __name__ == '__main__':
-  main()
+    df = main()
+    df.to_html('output.html')
+    
+    filtered_df = filter_sentences_df (df)
+    filtered_df.to_html('filter_output.html')
+
+    filtered_out_df = df[~df['HE_sentences'].isin(filtered_df['HE_sentences'])]
+    filtered_out_df.to_html('filtered_out_df.html')
