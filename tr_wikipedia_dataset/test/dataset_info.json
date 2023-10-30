@@ -1,0 +1,16 @@
+{
+  "citation": "",
+  "description": "",
+  "features": {
+    "HE_sentences": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "EN_sentences": {
+      "dtype": "string",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": ""
+}

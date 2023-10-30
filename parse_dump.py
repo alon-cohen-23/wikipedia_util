@@ -13,6 +13,7 @@ import pandas as pd
 from langdetect import detect
 from langdetect.lang_detect_exception import LangDetectException
 
+
 RE_BOLD = re.compile(r"'''(.*?)'''",re.MULTILINE | re.IGNORECASE)
 
 
@@ -139,10 +140,11 @@ def detect_lang (cell_content):
     
 if __name__ == '__main__':
     df = main()
-    df.to_html('output.html')
     
     filtered_df = filter_sentences_df (df)
-    filtered_df.to_html('filter_output.html')
-
+    print (filtered_df.columns)
+    #filtered_df.to_html('filter_output.html')
+    """
     filtered_out_df = df[~df['HE_sentences'].isin(filtered_df['HE_sentences'])]
     filtered_out_df.to_html('filtered_out_df.html')
+    """
