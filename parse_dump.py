@@ -21,18 +21,11 @@ def process_dump(dump, path):
   for page in dump:
       yield page
 
-dump_path = r'H:/Alon/wikipedia_util/hewiki-latest-pages-articles.xml.bz2'
+dump_path = r'H:\Alon\large_files/hewiki-latest-pages-articles.xml.bz2'
 paths = [dump_path]
 dump_gen = mwxml.map(process_dump, paths)
 
 def extract_rev_first_para(rev_text):
-    """        
-    rev_text : Wiki markup of a wikipedia page 
-
-    Returns
-    -------
-    text of the first section
-    """
     wikicode = mwparserfromhell.parse(rev_text)
     #templates = wikicode.filter_templates()
     # First paragraph bolds
@@ -90,7 +83,7 @@ def main():
             """
         data_frames.append(pd.DataFrame({'HE_sentences': page_sentences}))
                 
-        if index >100:
+        if index >1000:
             break
     sentences_df = pd.concat(data_frames, ignore_index=True)
     return sentences_df    
@@ -125,7 +118,7 @@ def filter_sentences_df (df):
    #filter the df to only hebrew sentences
    len_filtered_df['sen_lang'] = len_filtered_df['HE_sentences'].apply(lambda x: detect_lang(x))
    He_filtered_df = len_filtered_df.query("sen_lang == 'he'")
-  
+   
    return He_filtered_df
     
 def count_words(cell_content):
@@ -137,14 +130,32 @@ def detect_lang (cell_content):
         return detect(cell_content)
     except LangDetectException:
         return 'unknown'
-    
+
+def split_df (df):
+    copied_df = df.copy()
+   
+    for number in range (int(len(df)/30000+1)): # the max size for google translate 
+        if len(df)>30000:
+            part_df = copied_df.head(30000)
+            df = copied_df.drop(df.index[:30000])
+        else:
+            part_df = copied_df
+            
+        part_df.to_excel(f'he_tr_excel/{number}_part_HE.xlsx')    
+            
 if __name__ == '__main__':
     df = main()
     
-    filtered_df = filter_sentences_df (df)
-    print (filtered_df.columns)
+    df = filter_sentences_df (df)
+    print (df.columns)
+    df = df.drop(columns=['word_count', 'sen_lang'])
+    df.to_excel('1000_wikipedia_values_he.xlsx')
+    split_df (df)
+   
     #filtered_df.to_html('filter_output.html')
     """
     filtered_out_df = df[~df['HE_sentences'].isin(filtered_df['HE_sentences'])]
     filtered_out_df.to_html('filtered_out_df.html')
     """
+    
+    print (len(df)/30000)
