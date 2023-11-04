@@ -10,8 +10,7 @@ import mwxml
 import mwparserfromhell
 from nltk.tokenize import sent_tokenize
 import pandas as pd
-from langdetect import detect
-from langdetect.lang_detect_exception import LangDetectException
+from df_process import filter_sentences_df, split_df
 
 
 RE_BOLD = re.compile(r"'''(.*?)'''",re.MULTILINE | re.IGNORECASE)
@@ -59,33 +58,23 @@ def extract_first_first_bold_span_from_1st_sent(lines):
                 print ("Group {groupNum} found at {start}-{end}: {group}".format(groupNum = groupNum, start = match.start(groupNum), end = match.end(groupNum), group = match.group(groupNum)))
                 bold_spans.append(match.group(groupNum))
     return bold_spans
-        
-def clean_xml_string(xml_string):
-    # Define a regular expression to match invalid characters and replace them with an empty string
-    invalid_char_pattern = re.compile(r'[^\x09\x0A\x0D\x20-\uD7FF\uE000-\uFFFD\u10000-\u10FFFF]+', re.UNICODE)
-    return invalid_char_pattern.sub('', xml_string)
+
         
 def main():
     data_frames = []  # Create a list to store DataFrames
         
     for index, page in enumerate(dump_gen):
-        print('***',page.title)
+       
         page_wikicode = extract_page_wikicode(page)
         page_sentences = extract_sentences_from_wikicode (page_wikicode)
-        """
-        print (len(page_sentences))
-        count =0
-        for item in page_sentences:
-            if detect(item) == 'he':
-                count = count +1
-        print (count)
-        break    
-            """
+    
         data_frames.append(pd.DataFrame({'HE_sentences': page_sentences}))
                 
-        if index >1000:
+        if index >40000:
             break
+    
     sentences_df = pd.concat(data_frames, ignore_index=True)
+    
     return sentences_df    
 
 def extract_sentences_from_wikicode (wiki_text):
@@ -110,38 +99,6 @@ def extract_page_wikicode(page):
         break
     return page_wikicode          
 
-def filter_sentences_df (df):
-   # filter the length of the sentences (between 4-30 words)
-   df['word_count'] = df['HE_sentences'].apply(lambda x: count_words(x))
-   len_filtered_df = df.query('word_count > 3 and word_count < 31').copy()
-   
-   #filter the df to only hebrew sentences
-   len_filtered_df['sen_lang'] = len_filtered_df['HE_sentences'].apply(lambda x: detect_lang(x))
-   He_filtered_df = len_filtered_df.query("sen_lang == 'he'")
-   
-   return He_filtered_df
-    
-def count_words(cell_content):
-    words = cell_content.split()
-    return len(words)    
-
-def detect_lang (cell_content):
-    try:
-        return detect(cell_content)
-    except LangDetectException:
-        return 'unknown'
-
-def split_df (df):
-    copied_df = df.copy()
-   
-    for number in range (int(len(df)/30000+1)): # the max size for google translate 
-        if len(df)>30000:
-            part_df = copied_df.head(30000)
-            df = copied_df.drop(df.index[:30000])
-        else:
-            part_df = copied_df
-            
-        part_df.to_excel(f'he_tr_excel/{number}_part_HE.xlsx')    
             
 if __name__ == '__main__':
     df = main()
@@ -149,13 +106,12 @@ if __name__ == '__main__':
     df = filter_sentences_df (df)
     print (df.columns)
     df = df.drop(columns=['word_count', 'sen_lang'])
-    df.to_excel('1000_wikipedia_values_he.xlsx')
+    df.to_parquet('40000_wikipedia_values_he.parquet')
     split_df (df)
    
     #filtered_df.to_html('filter_output.html')
     """
     filtered_out_df = df[~df['HE_sentences'].isin(filtered_df['HE_sentences'])]
-    filtered_out_df.to_html('filtered_out_df.html')
     """
     
-    print (len(df)/30000)
+   
