@@ -68,9 +68,9 @@ def main():
         page_wikicode = extract_page_wikicode(page)
         page_sentences = extract_sentences_from_wikicode (page_wikicode)
     
-        data_frames.append(pd.DataFrame({'HE_sentences': page_sentences}))
+        data_frames.append(pd.DataFrame({'title': page.title, 'HE_sentences': page_sentences}))
                 
-        if index >40000:
+        if index >1000:
             break
     
     sentences_df = pd.concat(data_frames, ignore_index=True)
@@ -102,16 +102,7 @@ def extract_page_wikicode(page):
             
 if __name__ == '__main__':
     df = main()
-    
     df = filter_sentences_df (df)
-    print (df.columns)
-    df = df.drop(columns=['word_count', 'sen_lang'])
-    df.to_parquet('40000_wikipedia_values_he.parquet')
     split_df (df)
-   
-    #filtered_df.to_html('filter_output.html')
-    """
-    filtered_out_df = df[~df['HE_sentences'].isin(filtered_df['HE_sentences'])]
-    """
     
    

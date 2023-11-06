@@ -1,5 +1,6 @@
 import os
 import undetected_chromedriver as uc
+from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -22,27 +23,27 @@ def show_tooltip_message(message):
         timeout=10
     )
 
-def google_translate_folder_of_excels(folder_path):
+def google_translate_folder_of_excels(folder_path, chromedriver_path):
     """
 
     Parameters
     ----------
     folder_path : Path to folder with .xlsx files to translate
+    chromedriver_path: Path to the chromr driver 
     ***** Important: <= 1MB per file, as it may refuse to translate several larger files in seq 
     -------
     None.
 
     """
-    options = uc.options.ChromeOptions() #webdriver.ChromeOptions()
+    options =  webdriver.ChromeOptions() #uc.options.ChromeOptions()
 
     # Set the language to English
     options.add_argument("--lang=en")
     options.headless = False
-    
+    options.add_argument(f'--chromedriver-executable={chromedriver_path}')
 
     # Create a new Chrome driver instance
-    browser = uc.Chrome(options) # webdriver.Chrome(options=options)
-    
+    browser =  webdriver.Chrome(options=options) #uc.Chrome(options)
     
     # Display tooltip message using plyer
     show_tooltip_message("Please select the 'Documents' tab and set source and target languages.")
@@ -62,7 +63,7 @@ def google_translate_folder_of_excels(folder_path):
                 continue
             
             # Navigate to the desired website
-            browser.get("https://translate.google.com")
+            browser.get("https://translate.google.com/?hl=iw&sl=auto&tl=en&op=docs")
             
             # Use WebDriverWait to wait for the "Translate" button with a span containing "Translate"
             translate_button = WebDriverWait(browser, 120).until(
@@ -112,5 +113,6 @@ def google_translate_folder_of_excels(folder_path):
     browser.quit()
 
 # Call the function with the desired folder path
-folder_path = r"D:\NLP\web_scrape\temp\he"
-google_translate_folder_of_excels(folder_path)
+folder_path = r"H:/Alon/wikipedia_util/tr_dataset"
+chromedriver_path = 'H:/Alon/wikipedia_util/chromedriver.exe'
+google_translate_folder_of_excels(folder_path, chromedriver_path)

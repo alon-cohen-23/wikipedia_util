@@ -19,7 +19,7 @@ def filter_sentences_df (df):
    len_filtered_df['sen_lang'] = len_filtered_df['HE_sentences'].apply(lambda x: detect_lang(x))
    He_filtered_df = len_filtered_df.query("sen_lang == 'he'")
    
-   He_filtered_df = He_filtered_df['HE_sentences']
+   He_filtered_df = He_filtered_df[['title','HE_sentences']]
    return He_filtered_df
     
 def count_words(cell_content):
@@ -34,7 +34,8 @@ def detect_lang (cell_content):
 
 def split_df (df):
     copied_df = df.copy() 
-   
+    copied_df = copied_df.drop(columns= ['title'])
+    
     for number in range (int(len(df)/30000+1)): # the max size for google translate 
         if len(df)>30000:
             part_df = copied_df.head(30000)
