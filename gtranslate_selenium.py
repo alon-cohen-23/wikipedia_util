@@ -16,12 +16,6 @@ TRANSLATE_BUTTON_XPATH = "//button[span[contains(., 'Translate')]]"
 DOWNLOAD_BUTTON_XPATH = "//button[span[contains(., 'Download translation')]]"
 CLEAR_FILE_BUTTON_CSS_SELECTOR = "button[aria-label='Clear file']"
 
-def show_tooltip_message(message):
-    notification.notify(
-        title="Translation Instructions",
-        message=message,
-        timeout=10
-    )
 
 def google_translate_folder_of_excels(folder_path, chromedriver_path):
     """
@@ -44,11 +38,6 @@ def google_translate_folder_of_excels(folder_path, chromedriver_path):
 
     # Create a new Chrome driver instance
     browser =  webdriver.Chrome(options=options) #uc.Chrome(options)
-    
-    # Display tooltip message using plyer
-    show_tooltip_message("Please select the 'Documents' tab and set source and target languages.")
-    # Wait for 10 seconds - to allow selection of Documents tab | source and target langs
-    time.sleep(20)
     
     
     # Get the Windows Downloads folder path
