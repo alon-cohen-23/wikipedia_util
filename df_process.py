@@ -8,7 +8,7 @@ Created on Thu Nov  2 23:28:54 2023
 import pandas as pd 
 from langdetect import detect
 from langdetect.lang_detect_exception import LangDetectException
-import requests
+from pathlib import Path
 
 def filter_sentences_df (df):
    # filter the length of the sentences (between 4-30 words)
@@ -45,23 +45,24 @@ def split_df (df):
             
         part_df.to_excel(f'he_tr_excel/{number}_part_HE.xlsx')    
         
-def upload_df_online(df_html_path):
-        # URL of the website's file upload endpoint
-    upload_url = "https://AlonWikiDf23/"
+def concat_dir_excels(folder_path):
+    concat_df = pd.DataFrame()
     
-    # Create a dictionary to specify file details (name and content)
-    files = {
-        'file': (df_html_path, open(df_html_path, 'rb'), 'text/html')
-    }
+    for file_path in Path(folder_path).glob("*.xlsx"):
+        file_df = pd.read_excel(file_path)
+        concat_df = pd.concat([concat_df, file_df], ignore_index=True)        
     
-    # Send the POST request with the file and data
-    response = requests.post(upload_url,  files=files)
+    return concat_df
+        
+   
+if __name__ =='__main__':
+    en_df = concat_dir_excels('en_tr_excel')  
+    en_df = en_df.rename(columns={'HE_sentences': 'EN_sentences'})
     
-    # Check the response
-    if response.status_code == 200:
-        print("File uploaded successfully.")
-    else:
-        print(f"Failed to upload the file. Status code: {response.status_code}")
+    df = concat_dir_excels ('he_tr_excel')
+
+    df['EN_sentences'] = en_df['EN_sentences']    
+    df.to_parquet('translated_40000_values.parquet')    
    
     
     
