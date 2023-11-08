@@ -30,9 +30,13 @@ from huggingface_hub import notebook_login
 import loguru
 import wandb
 
+DO_TRAIN = True
+DO_EVAL = True
+DO_PREDICT = False
+
 wandb.login()
 # start a new wandb run to track this script
-wandb.init(project="NLLB-training-project", name = "run_2_nllb_train_he_en")
+wandb.init(project="NLLB-training-project", name = "run_3_nllb_eval_only_he_en")
 
 data_path = Path('./data')
 
@@ -125,7 +129,8 @@ output_name = get_output_model_name(model_checkpoint,src_lang,tgt_lang)
 # Load wikipeida dataset
 split_datasets = create_dataset_train_val(df_path='./data/translated_40000_values.parquet', 
                                           max_input_length=max_input_length, 
-                                          max_target_length=max_target_length)
+                                          max_target_length=max_target_length,
+                                          train_size=-1)
 
 
 
@@ -138,12 +143,6 @@ metric = load_metric("sacrebleu")
 
 
 
-
-
-
-# tokenizer = M2M100Tokenizer.from_pretrained(model_checkpoint)
-#tokenizer.src_lang = "he"
-#tokenizer.tgt_lang = "en"
 tokenizer = NllbTokenizer.from_pretrained(model_checkpoint, src_lang=src_lang, tgt_lang=tgt_lang)
 
 
@@ -214,6 +213,8 @@ model = AutoModelForSeq2SeqLM.from_pretrained(model_checkpoint)
 data_collator = DataCollatorForSeq2Seq(tokenizer, model=model)
 batch = data_collator([tokenized_datasets["train"][i] for i in range(1, 3)])
 
+predict_dataset=eval_dataset=tokenized_datasets["validation"]
+
 args = Seq2SeqTrainingArguments(
     output_name,
     evaluation_strategy="epoch",
@@ -222,12 +223,12 @@ args = Seq2SeqTrainingArguments(
     weight_decay=0.01,
     save_total_limit=3,
     num_train_epochs=2,
-    per_device_train_batch_size=16,
-    per_device_eval_batch_size=16,
+    per_device_train_batch_size=32,
+    per_device_eval_batch_size=32,
     eval_accumulation_steps=3,
     predict_with_generate=True,
     push_to_hub=False,
-    do_train=True,
+    do_train=DO_TRAIN,
     do_eval=True,
     fp16=True,
     report_to="wandb"
@@ -237,7 +238,7 @@ trainer = Seq2SeqTrainer(
     model,
     args,
     train_dataset=tokenized_datasets["train"],
-    eval_dataset=tokenized_datasets["validation"],
+    eval_dataset=eval_dataset,
     data_collator=data_collator,
     tokenizer=tokenizer,
     compute_metrics=compute_metrics,
@@ -247,8 +248,41 @@ trainer = Seq2SeqTrainer(
 wandb.log({"f1_scores_series": wandb.Table(data=f1_scores, columns=["F1 Score"])})
 
 # trainer.evaluate(max_length=max_target_length)
-trainer.train()
+if DO_TRAIN:
+    trainer.train()
 
+if  DO_EVAL:
+    print("*** Evaluate ***")
+
+    metrics = trainer.evaluate(max_length=max_target_length, num_beams=args.generation_num_beams, metric_key_prefix="eval")    
+    metrics["eval_samples"] = len(eval_dataset)
+
+    trainer.log_metrics("eval", metrics)
+    trainer.save_metrics("eval", metrics)
+    
+if DO_PREDICT:
+    print("*** Predict ***")
+    predict_results = trainer.predict(
+        predict_dataset, metric_key_prefix="predict", max_length=max_target_length, num_beams=args.generation_num_beams
+    )
+    metrics = predict_results.metrics
+    
+    trainer.log_metrics("predict", metrics)
+    trainer.save_metrics("predict", metrics)
+
+    if trainer.is_world_process_zero():
+        if args.predict_with_generate:
+            predictions = predict_results.predictions
+            predictions = np.where(predictions != -100, predictions, tokenizer.pad_token_id)
+            predictions = tokenizer.batch_decode(
+                predictions, skip_special_tokens=True, clean_up_tokenization_spaces=True
+            )
+            predictions = [pred.strip() for pred in predictions]
+            df = predict_dataset.to_pandas()
+            df['pred'] = predictions
+            df.to_parquet(Path(args.output_dir) / 'predictions.parquet')              
+            
+                
 wandb.finish()
 # trainer.evaluate(max_length=max_target_length)
 # trainer.push_to_hub(tags="translation", commit_message="Training complete")
