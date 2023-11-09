@@ -49,9 +49,7 @@ def calc_comet_score(comet_model, df_samp, col_src, col_dst, col_ref=None):
         })  
       
     model_output = comet_model.predict(data, batch_size=64, gpus=1)
-    df_samp['comet_score'] = model_output[0]
-    print('Bad translation ratio',df_samp[df_samp.comet_score < 0.50].shape[0] / df_samp.shape[0])
-    print(df_samp[['comet_score']].describe(percentiles=np.arange(0, 1, 0.1)))
+    df_samp['comet_score'] = model_output[0]    
     return df_samp
 
 
@@ -72,7 +70,7 @@ def predict(tokenizer, model ,df_samp, col_src='he', dst_lang="eng_Latn", batch_
 def main():
     max_samples = 4000 # TODO: Remove
     # make predictions (translations)
-    model_name_or_path = "facebook/nllb-200-distilled-1.3B"
+    model_name_or_path = "/data2/NLP/translation/nllb/output_models/nllb-200-distilled-1.3B_heb_eng_wiki_40000/checkpoint-80448" # "facebook/nllb-200-distilled-1.3B"
 
     src_lang="heb_Hebr"
     dst_lang="eng_Latn"
@@ -95,7 +93,13 @@ def main():
     comet_model_path = download_model("Unbabel/wmt22-cometkiwi-da")
     comet_model = load_from_checkpoint(comet_model_path)
     df_samp = calc_comet_score(comet_model=comet_model, df_samp=df_samp, col_src='he', col_dst='pred')
-    df_samp[df_samp.comet_score < 0.50]
+    df_samp.to_parquet('./temp/test_commet.parquet')
+    df_samp[df_samp.comet_score < 0.50][:200].to_html('./temp/bad_lt_0_5.html')
+    df_samp[df_samp.comet_score > 0.7][:200].to_html('./temp/good_gt_0_7.html')
+    print('Bad translation ratio',df_samp[df_samp.comet_score < 0.50].shape[0] / df_samp.shape[0])
+    descrb = df_samp[['comet_score']].describe(percentiles=np.arange(0, 1, 0.1))
+    print(descrb)
+    descrb.to_html('./temp/commet_score_quantiles.html')
     return df_samp
     
 if __name__ == "__main__":    
