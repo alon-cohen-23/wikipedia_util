@@ -32,7 +32,7 @@ import wandb
 
 DO_TRAIN = True
 DO_EVAL = True
-DO_PREDICT = False
+DO_PREDICT = True
 
 wandb.login()
 # start a new wandb run to track this script
@@ -108,7 +108,7 @@ def get_output_model_name(model_checkpoint,src_lang,tgt_lang):
 
 
 # Language codes: https://github.com/facebookresearch/flores/blob/main/flores200/README.md#languages-in-flores-200
-model_checkpoint = "facebook/nllb-200-distilled-1.3B" # facebook/nllb-200-distilled-1.3B "facebook/m2m100_418M" # "facebook/nllb-200-distilled-600M"
+model_checkpoint = "facebook/nllb-200-distilled-1.3B" # 'output_models/nllb-200-distilled-1.3B_heb_eng_wiki_40000/checkpoint-80448/' # "facebook/nllb-200-distilled-1.3B" # "facebook/m2m100_418M" # "facebook/nllb-200-distilled-600M"
     
 src_lang = "heb_Hebr"
 tgt_lang="eng_Latn"
@@ -130,7 +130,7 @@ output_name = get_output_model_name(model_checkpoint,src_lang,tgt_lang)
 split_datasets = create_dataset_train_val(df_path='./data/translated_40000_values.parquet', 
                                           max_input_length=max_input_length, 
                                           max_target_length=max_target_length,
-                                          train_size=-1)
+                                          train_size=-1) # DO_PRED --> train_size=100 to avoid long tokenization
 
 
 
