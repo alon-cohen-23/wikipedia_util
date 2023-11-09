@@ -62,16 +62,25 @@ def extract_first_first_bold_span_from_1st_sent(lines):
         
 def main():
     data_frames = []  # Create a list to store DataFrames
-        
+    
+    relevant_values_df = pd.read_parquet('categories_pages/he/pages.parquet')
+    relevant_values_titles = relevant_values_df['Page'].to_list()    
+    
     for index, page in enumerate(dump_gen):
        
-        page_wikicode = extract_page_wikicode(page)
-        page_sentences = extract_sentences_from_wikicode (page_wikicode)
-    
-        data_frames.append(pd.DataFrame({'title': page.title, 'HE_sentences': page_sentences}))
-                
-        if index >1000:
-            break
+        try:
+            if page.title in relevant_values_titles:
+            
+                page_wikicode = extract_page_wikicode(page)
+                page_sentences = extract_sentences_from_wikicode (page_wikicode)
+            
+                data_frames.append(pd.DataFrame({'title': page.title, 'HE_sentences': page_sentences}))
+        
+        except:
+            print ('failed to load {pag.title}')
+            
+        if index%10000 ==0:
+            print (f'already iterated over {index} values')
     
     sentences_df = pd.concat(data_frames, ignore_index=True)
     
@@ -102,7 +111,9 @@ def extract_page_wikicode(page):
             
 if __name__ == '__main__':
     df = main()
-    df = filter_sentences_df (df)
-    split_df (df)
+    df.to_parquet('relevant_categories_sentences.parquet')
     
+    """df = filter_sentences_df (df)
+    split_df (df)
+    """
    
