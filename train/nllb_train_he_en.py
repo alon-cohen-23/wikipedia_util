@@ -24,10 +24,8 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
 import torch
-from transformers import NllbTokenizer, M2M100Tokenizer, AutoModelForSeq2SeqLM, DataCollatorForSeq2Seq, Seq2SeqTrainingArguments, Seq2SeqTrainer
+from transformers import NllbTokenizer, AutoModelForSeq2SeqLM, DataCollatorForSeq2Seq, Seq2SeqTrainingArguments, Seq2SeqTrainer
 from datasets import load_dataset, load_metric, Dataset, DatasetDict, load_from_disk
-from huggingface_hub import notebook_login
-import loguru
 import wandb
 
 DO_TRAIN = True
@@ -36,14 +34,14 @@ DO_PREDICT = True
 
 wandb.login()
 # start a new wandb run to track this script
-wandb.init(project="NLLB-training-project", name = "run_3_nllb_eval_only_he_en")
+wandb.init(project="NLLB-training-project", name = "run_1_4M_nllb_he_en")
 
 data_path = Path('./data')
 
   
 def create_dataset_train_val(df_path, random_state=42, test_size=25000, 
                              max_input_length=200, max_target_length=200, train_size=-1, 
-                             dataset_name = 'wikipedia_he_en_40000'):  
+                             dataset_name = 'wikipedia_he_en_relevant_cats'):  
     df = pd.read_parquet(df_path)  
     if 'Unnamed: 0' in df.columns:  
         df = df.drop(columns=['Unnamed: 0'])  
@@ -127,7 +125,7 @@ output_name = get_output_model_name(model_checkpoint,src_lang,tgt_lang)
 
 
 # Load wikipeida dataset
-split_datasets = create_dataset_train_val(df_path='./data/translated_40000_values.parquet', 
+split_datasets = create_dataset_train_val(df_path='./data/translated_df_relevant_cats.parquet', 
                                           max_input_length=max_input_length, 
                                           max_target_length=max_target_length,
                                           train_size=-1) # DO_PRED --> train_size=100 to avoid long tokenization
