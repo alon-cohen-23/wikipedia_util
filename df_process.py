@@ -43,7 +43,7 @@ def split_df (df):
         else:
             part_df = copied_df
             
-        part_df.to_excel(f'he_tr_excel/{number}_part_HE.xlsx')    
+        part_df.to_excel(f'he_tr_excel/{number}_part_HE.xlsx', index=False)    
         
 def concat_dir_excels(folder_path):
     concat_df = pd.DataFrame()
@@ -53,17 +53,33 @@ def concat_dir_excels(folder_path):
         concat_df = pd.concat([concat_df, file_df], ignore_index=True)        
     
     return concat_df
-        
-   
-if __name__ =='__main__':
-    en_df = concat_dir_excels('en_tr_excel')  
-    en_df = en_df.rename(columns={'HE_sentences': 'EN_sentences'})
-    
-    df = concat_dir_excels ('he_tr_excel')
+def create_concatenated_translated_df (he_folder_path,en_folder_path):
+    """
+    Parameters
+    ----------
+    he_folder_path : path to the folder that contains the splited Hebrew sentences df 
+    en_folder : path to the folder that contains the splited translated English sentences df 
 
-    df['EN_sentences'] = en_df['EN_sentences']    
-    df.to_parquet('translated_40000_values.parquet')    
-   
+    Returns
+    -------
+    concatenated df that contains the data of all of the files from both folders, drop the duplicates,
+    and has 2 columns: HE_sentences, EN_sentences
+    """        
+    df = concat_dir_excels('tr_data/he_tr_excel')
+    
+    en_df = concat_dir_excels('tr_data/en_tr_excel')
+    en_df = en_df.rename(columns = {'HE_sentences': 'EN_sentences'})
+    
+    df['EN_sentences'] = en_df['EN_sentences']
+    df = df.drop_duplicates(subset=['HE_sentences']) # I translated the duplicates as well so I cant drop them in the beggining
+    
+    df = df.reset_index(drop=True)
+    
+    return df
+    
+if __name__ =='__main__':
+    
+    
     
     
     

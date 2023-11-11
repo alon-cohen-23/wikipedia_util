@@ -101,8 +101,8 @@ def extract_page_wikicode(page):
 
             
 if __name__ == '__main__':
-    df = main()
-    df = filter_sentences_df (df)
-    split_df (df)
+    df = pd.read_parquet('/Users/aloncohen/Documents/large_files/wikipedia_util_tr_data/relevant_categories_sentences.parquet')
+    df = filter_sentences_df(df)
+    split_df(df)
     
    
