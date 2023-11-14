@@ -67,12 +67,10 @@ def predict(tokenizer, model ,df_samp, col_src='he', dst_lang="eng_Latn", batch_
         translated_texts += tokenizer.batch_decode(translated_tokens, skip_special_tokens=True)[:]
     return translated_texts
 
-def main():
-    max_samples = 4000 # TODO: Remove
+def main(model_name_or_path, max_samples = 4000):     
     # make predictions (translations)
-    model_name_or_path = "/data2/NLP/translation/nllb/output_models/nllb-200-distilled-1.3B_heb_eng_wiki_40000/checkpoint-80448" # "facebook/nllb-200-distilled-1.3B"
-
     src_lang="heb_Hebr"
+    col_src='he'
     dst_lang="eng_Latn"
     model = AutoModelForSeq2SeqLM.from_pretrained(model_name_or_path, torch_dtype=torch.float16).to(device)
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, src_lang=src_lang)
@@ -83,7 +81,7 @@ def main():
     df_samp = pd.read_parquet(testset_path)
     
     df_samp = df_samp[:max_samples]
-    translated_texts = predict(tokenizer, model ,df_samp, col_src='he', dst_lang="eng_Latn")
+    translated_texts = predict(tokenizer, model ,df_samp, col_src=col_src, dst_lang=dst_lang)
     df_samp['pred'] = translated_texts
     
     
@@ -92,7 +90,7 @@ def main():
     
     comet_model_path = download_model("Unbabel/wmt22-cometkiwi-da")
     comet_model = load_from_checkpoint(comet_model_path)
-    df_samp = calc_comet_score(comet_model=comet_model, df_samp=df_samp, col_src='he', col_dst='pred')
+    df_samp = calc_comet_score(comet_model=comet_model, df_samp=df_samp, col_src=col_src, col_dst='pred')
     df_samp.to_parquet('./temp/test_commet.parquet')
     df_samp[df_samp.comet_score < 0.50][:200].to_html('./temp/bad_lt_0_5.html')
     df_samp[df_samp.comet_score > 0.7][:200].to_html('./temp/good_gt_0_7.html')
@@ -103,5 +101,6 @@ def main():
     return df_samp
     
 if __name__ == "__main__":    
-    df_samp = main()
+    df_samp = main(model_name_or_path = 'output_models/nllb-200-distilled-600M_heb_eng/checkpoint-172058/')
+    # "/data2/NLP/translation/nllb/output_models/nllb-200-distilled-1.3B_heb_eng_wiki_40000/checkpoint-80448" # "facebook/nllb-200-distilled-1.3B"
     
