@@ -43,16 +43,20 @@ def get_pages_and_subcategories(top_categories, max_depth=6, language='he'):
     return all_pages, list(visited_categories)
 
 # Example usage:
-top_categories = ["קטגוריה:צבא","קטגוריה:לחימה", "קטגוריה:סכסוכים", "קטגוריה:המזרח_התיכון"]
-pages, subcategories = get_pages_and_subcategories(top_categories)
+lang = 'ar'
+top_categories = { 'ar' : ["تصنيف:عسكرية","تصنيف:نزاع_عنيف", "تصنيف:نزاع", "تصنيف:الشرق_الأوسط"],
+                   'he' :  ["קטגוריה:צבא","קטגוריה:לחימה", "קטגוריה:סכסוכים", "קטגוריה:המזרח_התיכון"]
+                  }
+#top_categories =
+pages, subcategories = get_pages_and_subcategories(top_categories[lang], language=lang)
 
 # Create dataframes for pages and subcategories
 pages_df = pd.DataFrame({"Page": pages})
 subcategories_df = pd.DataFrame({"Subcategory": subcategories})
 
 # Define paths for the Parquet files
-pages_file_path = "pages.parquet"
-subcategories_file_path = "subcategories.parquet"
+pages_file_path = f"relevant_pages_{lang}.parquet"
+subcategories_file_path = f"relevant_subcategories_{lang}.parquet"
 
 # Write dataframes to Parquet files
 pages_df.to_parquet(pages_file_path)
