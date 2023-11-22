@@ -1,7 +1,9 @@
+import time
 import pandas as pd
 from loguru import logger
 import wikipediaapi
 
+MAX_RETRIES = 3
 def get_pages_and_subcategories(top_categories, max_depth=6, language='he'):
     user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36 Edg/92.0.902.78'
     
@@ -16,16 +18,26 @@ def get_pages_and_subcategories(top_categories, max_depth=6, language='he'):
 
         visited_categories.add(category.title)
         print(f"Subcategory: {category.title}")
-
         subcategories = category.categorymembers
         for subcategory in subcategories.values():
-            if subcategory.ns == wikipediaapi.Namespace.CATEGORY:
-                collect_all_pages_and_descendants(subcategory, page_list, visited_pages, visited_categories, depth - 1)
-            elif subcategory.ns == wikipediaapi.Namespace.MAIN:
-                if subcategory.title not in visited_pages:
-                    page_list.append(subcategory.title)
-                    visited_pages.add(subcategory.title)
-                    print(f"Page: {subcategory.title}")
+            num_retries = 0
+            while True:
+                try:
+                    if subcategory.ns == wikipediaapi.Namespace.CATEGORY:
+                        collect_all_pages_and_descendants(subcategory, page_list, visited_pages, visited_categories, depth - 1)
+                    elif subcategory.ns == wikipediaapi.Namespace.MAIN:
+                        if subcategory.title not in visited_pages:
+                           page_list.append(subcategory.title)
+                           visited_pages.add(subcategory.title)
+                           print(f"Page: {subcategory.title}")
+                    break # on successful attempt - break from while True retries loop (no retries)
+                except Exception as e:
+                  num_retries += 1
+                  if num_retries == MAX_RETRIES:
+                    logger.error(f"Failed to process {subcategory} after {MAX_RETRIES} retries. Skipping.")
+                    break
+                  logger.warning(f"Error processing {subcategory}, retrying ({num_retries} of {MAX_RETRIES}): {e}")
+                  time.sleep(5)
 
     all_pages = []
     visited_pages = set()
