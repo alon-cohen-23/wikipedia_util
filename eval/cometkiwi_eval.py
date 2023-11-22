@@ -91,12 +91,14 @@ def main(model_name_or_path, max_samples = 4000):
     comet_model_path = download_model("Unbabel/wmt22-cometkiwi-da")
     comet_model = load_from_checkpoint(comet_model_path)
     df_samp = calc_comet_score(comet_model=comet_model, df_samp=df_samp, col_src=col_src, col_dst='pred')
+    Path('./temp').mkdir(exist_ok=True)
     df_samp.to_parquet('./temp/test_commet.parquet')
     df_samp[df_samp.comet_score < 0.50][:200].to_html('./temp/bad_lt_0_5.html')
     df_samp[df_samp.comet_score > 0.7][:200].to_html('./temp/good_gt_0_7.html')
     print('Bad translation ratio',df_samp[df_samp.comet_score < 0.50].shape[0] / df_samp.shape[0])
     descrb = df_samp[['comet_score']].describe(percentiles=np.arange(0, 1, 0.1))
     print(descrb)
+    
     descrb.to_html('./temp/commet_score_quantiles.html')
     return df_samp
     
