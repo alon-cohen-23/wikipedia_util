@@ -10,7 +10,7 @@ import mwxml
 import mwparserfromhell
 from nltk.tokenize import sent_tokenize
 import pandas as pd
-from df_process import filter_sentences_df
+from dataset.df_process import filter_sentences_df
 
 
 RE_BOLD = re.compile(r"'''(.*?)'''",re.MULTILINE | re.IGNORECASE)

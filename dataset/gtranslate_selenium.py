@@ -110,6 +110,8 @@ def google_translate_folder_of_excels(folder_path):
     browser.close()
     browser.quit()
 
-# Call the function with the desired folder path
-folder_path = r"/Users/aloncohen/Documents/wikipedia_util/he_tr_excel"
-google_translate_folder_of_excels(folder_path)
+
+if __name__ =='__main__':
+    # Call the function with the desired folder path
+    folder_path = r"d:/workspace/tr_data/he_tr_excel"
+    google_translate_folder_of_excels(folder_path)
