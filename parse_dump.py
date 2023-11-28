@@ -10,7 +10,7 @@ import mwxml
 import mwparserfromhell
 from nltk.tokenize import sent_tokenize
 import pandas as pd
-from df_process import filter_sentences_df, split_df
+from df_process import filter_sentences_df
 
 RE_BOLD = re.compile(r"'''(.*?)'''", re.MULTILINE | re.IGNORECASE)
 
@@ -20,7 +20,7 @@ def process_dump(dump, path):
         yield page
 
 
-dump_path = r'H:\Alon\large_files/hewiki-latest-pages-articles.xml.bz2'
+dump_path = r'path/to/xml'
 paths = [dump_path]
 dump_gen = mwxml.map(process_dump, paths)
 
@@ -66,25 +66,55 @@ def extract_first_first_bold_span_from_1st_sent(lines):
     return bold_spans
 
 
-def main():
+def main(pages_df_path):
+    """
+    Returns
+    -------
+    sentences_df : df that contains 2 columns: HE_sentences: contains the text of the relevant values based on the given df_path devided to sentences.
+    title: the title of the wikipedia value that contain the given sentence.
+
+    """
+    pages_df = pd.read_parquet(pages_df_path)
+
+    pages = pages_df['Page'].to_list()
     data_frames = []  # Create a list to store DataFrames
+
+    relevant_values_df = pd.read_parquet('categories_pages/he/pages.parquet')
+    relevant_values_titles = relevant_values_df['Page'].to_list()
 
     for index, page in enumerate(dump_gen):
 
-        page_wikicode = extract_page_wikicode(page)
-        page_sentences = extract_sentences_from_wikicode(page_wikicode)
+        try:
+            if page.title in relevant_values_titles:
+                page_wikicode = extract_page_wikicode(page)
+                page_sentences = extract_sentences_from_wikicode(page_wikicode)
 
-        data_frames.append(pd.DataFrame({'title': page.title, 'HE_sentences': page_sentences}))
+                data_frames.append(pd.DataFrame({'title': page.title, 'HE_sentences': page_sentences}))
 
-        if index > 1000:
-            break
+        except:
+            print('failed to load {pag.title}')
+
+        if index % 10000 == 0:
+            print(f'already iterated over {index} values')
 
     sentences_df = pd.concat(data_frames, ignore_index=True)
+    sentences_df = filter_sentences_df(df)  # filter the df by calling the function from df_process.py
 
     return sentences_df
 
 
 def extract_sentences_from_wikicode(wiki_text):
+    """
+
+    Parameters
+    ----------
+    wiki_text : wikicode text.
+
+    Returns
+    -------
+    sentences : parse the wikicode to regular text and slit it to sentences.
+
+    """
     wikicode = mwparserfromhell.parse(wiki_text)
     text = str(wikicode.strip_code())
 
@@ -109,7 +139,11 @@ def extract_page_wikicode(page):
 
 
 if __name__ == '__main__':
-    df = pd.read_parquet(
-        '/Users/aloncohen/Documents/large_files/wikipedia_util_tr_data/relevant_categories_sentences.parquet')
-    df = filter_sentences_df(df)
-    split_df(df)
+    df = main()
+    df.to_parquet('relevant_categories_sentences.parquet')
+
+    """df = filter_sentences_df (df)
+    split_df (df)
+    """
+    pages_df_path = 'categories_pages/he/pages.parquet'
+    df = main(pages_df_path)

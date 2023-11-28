@@ -9,9 +9,21 @@ import pandas as pd
 from langdetect import detect
 from langdetect.lang_detect_exception import LangDetectException
 from pathlib import Path
+from gtranslate_selenium import google_translate_folder_of_excels
 
 
 def filter_sentences_df(df):
+    """
+
+    Parameters
+    ----------
+    df : pandas dataframe.
+
+    Returns
+    -------
+    He_filtered_df : filter the df to sentences with 4-30 words, that written only in Hebrew.
+
+    """
     # filter the length of the sentences (between 4-30 words)
     df['word_count'] = df['HE_sentences'].apply(lambda x: count_words(x))
     len_filtered_df = df.query('word_count > 3 and word_count < 31').copy()
@@ -37,6 +49,17 @@ def detect_lang(cell_content):
 
 
 def split_df(df):
+    """
+
+    Parameters
+    ----------
+    df : pandas dataframe.
+
+    Returns
+    -------
+    splits the df to multiple excel file, all under the he_tr_excel folder.
+    The function us necessary because google translate can not work with files that are bigger than about 30000 rows.
+    """
     copied_df = df.copy()
     copied_df = copied_df.drop(columns=['title'])
 
@@ -87,4 +110,15 @@ def create_concatenated_translated_df(he_folder_path, en_folder_path):
 
 
 if __name__ == '__main__':
-    pass
+    # the 5 steps of translating a df
+
+    df = pd.read_parquet('path/to/df')  # step 1: read the df
+    split_df(df)  # step 2: split the df for Google translate
+
+    he_folder_path = 'he_tr_excel'  # splited_df saves the files in this folder
+    google_translate_folder_of_excels('he_tr_excel')  # step 3: translate the splited files
+
+    # step 4: move the translated files from the downloads to new folder (or keep the download folder clean from irelevent excel files).
+
+    en_folder_path = 'en_folder_path(change to your own)'
+    create_concatenated_translated_df(he_folder_path, en_folder_path)  # step 5: concat everithing together
