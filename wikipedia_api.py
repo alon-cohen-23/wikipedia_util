@@ -2,11 +2,12 @@ import pandas as pd
 from loguru import logger
 import wikipediaapi
 
+
 def get_pages_and_subcategories(top_categories, max_depth=6, language='he'):
-    user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36 Edg/92.0.902.78'
-    
-    wiki_wiki = wikipediaapi.Wikipedia(language=language, user_agent=user_agent)    
-        
+    user_agent = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                  'Chrome/92.0.4515.131 Safari/537.36 Edg/92.0.902.78')
+    wiki_wiki = wikipediaapi.Wikipedia(language=language, user_agent=user_agent)
+
     def collect_all_pages_and_descendants(category, page_list, visited_pages, visited_categories, depth):
         if depth == 0:
             return
@@ -37,13 +38,14 @@ def get_pages_and_subcategories(top_categories, max_depth=6, language='he'):
         except:
             logger.info(f'Failed to find the category: {category_name}. Skipping it and all its sub-categories')
             continue
-        
+
         collect_all_pages_and_descendants(category, all_pages, visited_pages, visited_categories, depth=max_depth)
 
     return all_pages, list(visited_categories)
 
+
 # Example usage:
-top_categories = ["קטגוריה:צבא","קטגוריה:לחימה", "קטגוריה:סכסוכים", "קטגוריה:המזרח_התיכון"]
+top_categories = ["קטגוריה:צבא", "קטגוריה:לחימה", "קטגוריה:סכסוכים", "קטגוריה:המזרח_התיכון"]
 pages, subcategories = get_pages_and_subcategories(top_categories)
 
 # Create dataframes for pages and subcategories
@@ -57,4 +59,3 @@ subcategories_file_path = "subcategories.parquet"
 # Write dataframes to Parquet files
 pages_df.to_parquet(pages_file_path)
 subcategories_df.to_parquet(subcategories_file_path)
-
