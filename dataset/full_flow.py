@@ -5,8 +5,24 @@ from dataset.df_process import filter_sentences_df, split_df, create_concatenate
 from dataset.gtranslate_selenium import google_translate_folder_of_excels
 from dataset.text_files.read_and_translate_text_files import read_all_files
 
+from enum import Enum, auto
+from typing import List
 
-def preprocess_df(df):
+
+class FlowSteps(Enum):
+    ReadInputIntoDfAndFilter = auto(),
+    ReplaceEntitiesInInput = auto(),
+    SplitIntoFilesForGoogleTranslate = auto(),
+    GoogleTranslate = auto(),
+    RemindToCopyFromDownloads = auto(),
+    ConcatTranslationFiles = auto(),
+    PrepareDfForPipeline = auto()
+
+
+AllSteps = list(FlowSteps._member_map_.values())
+
+
+def preprocess_df(df: pd.DataFrame) -> pd.DataFrame:
     max_input_length = 200
     max_target_length = 200
 
@@ -21,7 +37,7 @@ def preprocess_df(df):
     return df.drop(columns=['EN_sentences', 'HE_sentences'])
 
 
-def full_flow(input_path, input_name, output_root, steps):
+def full_flow(input_path: str, input_name: str, output_root: str, steps: List[FlowSteps]):
     """
     Run a full flow for preparing a dataset. The input parameters steps specifies what steps should run.
     If a step exists in the list then it will be run. Otherwise, it will be either be skipped or read from disk.
@@ -39,8 +55,8 @@ def full_flow(input_path, input_name, output_root, steps):
     output_translated_file = f"{output_root}/{input_name}/translated_{input_name}.parquet"
     output_translated_file_final = f"{output_root}/{input_name}/translated_{input_name}_final.parquet"
 
-    # step 1: prepare the df
-    if 1 in steps:
+    # step: prepare the df
+    if FlowSteps.ReadInputIntoDfAndFilter in steps:
         # currently, assumes input is a collection of text file which possibly isn't true for wiki data collected
         # need to adapt the wikipedia code and call it here if input_name=="wiki"
         # this code assumes the structure of the
@@ -50,34 +66,37 @@ def full_flow(input_path, input_name, output_root, steps):
     else:
         df = pd.read_parquet(input_pages_file)
 
-    # step 2: split the df for Google translate
-    if 2 in steps:
+    # if FlowSteps.ReplaceEntitiesInInput in steps:
+    #     pass
+
+    # step: split the df for Google translate
+    if FlowSteps.SplitIntoFilesForGoogleTranslate in steps:
         split_df(df, he_folder_path)
 
-    # step 3: translate the split files
-    if 3 in steps:
+    # step: translate the split files
+    if FlowSteps.GoogleTranslate in steps:
         google_translate_folder_of_excels(he_folder_path)
 
-    if 4 in steps:
+    if FlowSteps.RemindToCopyFromDownloads in steps:
         print(f"This step is manual: copy files from downloads into {en_folder_path}!")
     # step 4 (manual): move the translated files from the downloads to new folder
     # (or keep the download folder clean from irrelevant Excel files).
 
-    # step 5: concat everything together
-    if 5 in steps:
+    # step: concat everything together
+    if FlowSteps.ConcatTranslationFiles in steps:
         en_he_df = create_concatenated_translated_df(he_folder_path, en_folder_path)
         en_he_df.to_parquet(output_translated_file)
     else:
         en_he_df = pd.read_parquet(output_translated_file)
 
-    # step 6: organize the dataframe so it is ready for pipeline
-    if 6 in steps:
+    # step: organize the dataframe so it is ready for pipeline
+    if FlowSteps.PrepareDfForPipeline in steps:
         en_he_df = preprocess_df(en_he_df)
         en_he_df.to_parquet(output_translated_file_final)
 
 
 if __name__ =='__main__':
-    full_flow(input_path=r"/workspace/translation/inss/data", input_name="inss", output_root=r"/workspace/translation",
-              steps=[1, 2, 3, 4, 5, 6])
+    full_flow(input_path=r"d:/workspace/tr_data/teheran/data", input_name="inss", output_root=r"d:/workspace/tr_data",
+              steps=AllSteps)
 
 
