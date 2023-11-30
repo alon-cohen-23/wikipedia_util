@@ -54,7 +54,7 @@ class EntityDB:
 
 class EntityPersistency:
     def __init__(self, entity_db_location):
-        db = TinyDB(entity_db_location, ensure_ascii=False)
+        db = TinyDB(entity_db_location, ensure_ascii=False, encoding='utf-8')
         self.db = db.table("entities")
         self.db_state_table = db.table("state")
         self.last_count = self.get_last_count()
@@ -117,6 +117,8 @@ if __name__ == '__main__':
     persistency.upsert_entity("ישראל", "Location", "source2")
     persistency.upsert_entity("ישראל", "Person", "source1")
     persistency.upsert_entity("יעקב", "Person", "source1")
+    persistency.upsert_entity(name="بدنا_كهربا", type="Organization", source="source1")
+
     print(persistency.get_new_name("ישראל", "Person"))
     print(persistency.get_new_name("ישראל", "Location"))
 
