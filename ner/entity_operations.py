@@ -47,29 +47,6 @@ class EntityInfo:
     def print_name_and_type(self):
         print(f"Found entity = {self.name}, type = {self.entity_type}")
 
-    def track(self, persistency: EntityPersistency, source: str):
-        """
-        Search for replacement string matching this entity.
-        - If not found, create one and update DB.
-        - If found, update source (add to list if doesn't exist)
-        Parameters
-        ----------
-        persistency (EntityPersistency): class responsible for communicating with the DB
-        source (str): entity source (e.g. "wiki")
-
-        Returns
-        -------
-        String that can be used to replace the entity in the sentence
-        """
-        replacement_string = persistency.get_replacement(self.name)
-        if replacement_string is None:
-            replacement_string = f"{persistency.last_count:06d}"
-            persistency.increment_count()
-            persistency.add_entity(self.name, self.entity_type, replacement_string, source)
-        else:
-            persistency.update_source(self.name, self.entity_type, source)
-        return replacement_string
-
 
 class ModelInfo:
     def __init__(self, checkpoint):
@@ -126,6 +103,24 @@ class ReplacedLineBuilder(AbstractContextManager):
 
         self.last_index = self.line_info.end(entity_info.word_end_index)
 
+    @cached_property
+    def built_line(self):
+        if len(self.updated_ln) == 0:
+            return self.line_info.line
+        return self.updated_ln
+
+def replace_all_lines(lines: List[str], source, persistency):
+    replaced_lines = []
+    for l in lines:
+        line_info = LineInfo(l)
+        with ReplacedLineBuilder(line_info) as builder:
+            for entity_info in entities(model_info, line_info):
+                replacement_string = persistency.upsert_entity(entity_info.name, entity_info.entity_type, source)
+                builder.new_entity(entity_info, replacement_string)
+            replaced_lines.append(builder.built_line)
+
+    return replaced_lines
+
 
 if __name__ == '__main__':
     ln1 = "מחקר במכון מוכוון מדיניות ותוצריו מיועדים לשמש את מקבלי ההחלטות במדינת ישראל ואת הציבור הרחב"
@@ -137,20 +132,25 @@ if __name__ == '__main__':
     model_info = ModelInfo(model_checkpoint)
     persistency = EntityPersistency(entity_db_location=r"D:\translator\entities.json")
 
-    lines = [ln1, ln2, ln3, ln4]
-    replaced_lines = []
-    # lines = [ln3, ln4]
-    for l in lines:
-        line_info = LineInfo(l)
-        for entity_info in entities(model_info, line_info):
-            replacement_string = entity_info.track(persistency, "inss")
-            with ReplacedLineBuilder(line_info) as builder:
-                builder.new_entity(entity_info, replacement_string)
-        replaced_lines.append(builder.updated_ln)
+    source = "inss"
+    import pandas as pd
+    input_pages_file = rf"D:\workspace\tr_data\{source}/all_pages.parquet"
+    df = pd.read_parquet(input_pages_file)
+    lines = df["HE_sentences"].to_list()
 
+    #lines = [ln1, ln2, ln3, ln4]
+    # lines = [
+    #     'אסור לנו להרפות מהחטטנים העלובים האלה.', 'את יכולה לבוא למטבח לעזור לי?', 'את צריכה גם את עזרתי?',
+    #     'אקרא לך כשזה יהיה מוכן.', 'אני מתנצלת על מה שקורה עם ראזיה.',
+    #     'לא יודעת איך הילדה שלי נכנסה לשיגעון הזה של הסטודנטים האסלאמיסטים.',
+    # ]
+    #lines = ['- בת ים, ישראל - עיני האחת נשואה לירושלים" "והשניה לאיספהאן. ', 'תני לי דחוף את רפאל-. ']
+    replaced_lines = replace_all_lines(lines, source, persistency)
     print(lines)
     print(replaced_lines)
+    df["HE_sentences"] = replaced_lines
+    df.to_parquet(rf"D:\workspace\tr_data\{source}/all_pages_er.parquet")
     # print(persistency.get_all_source_entities("inss"))
     # print(persistency.get_all_source_entities("teheran"))
     # print(persistency.get_all_source_entities("wiki"))
-    #
+
