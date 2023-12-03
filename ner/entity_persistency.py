@@ -4,16 +4,16 @@ from typing import List, Tuple
 
 
 class SourceDB:
-    def __init__(self, name, count=0):
-        self.name = name
+    def __init__(self, sname, count=0):
+        self.sname = sname
         self.count = count
 
     def to_dict(self):
-        return {'name': self.name, 'count': self.count}
+        return {'sname': self.name, 'count': self.count}
 
     @staticmethod
     def from_dict(d):
-        return SourceDB(d['name'], d['count'])
+        return SourceDB(d['sname'], d['count'])
 
 
 class EntityDB:
