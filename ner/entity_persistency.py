@@ -9,7 +9,7 @@ class SourceDB:
         self.count = count
 
     def to_dict(self):
-        return {'sname': self.name, 'count': self.count}
+        return {'sname': self.sname, 'count': self.count}
 
     @staticmethod
     def from_dict(d):
@@ -26,7 +26,7 @@ class EntityDB:
     def update_source(self, source: str):
         source_loc = -1
         for i, s in enumerate(self.sources):
-            if s.name == source:
+            if s.sname == source:
                 source_loc = i
         if source_loc >= 0:
             self.sources[source_loc].count += 1
