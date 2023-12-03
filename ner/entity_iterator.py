@@ -7,6 +7,12 @@ from typing import Iterator, List
 from functools import cached_property
 
 
+def is_nikud(c):
+    # notepad++ regular expression search: [\x{0591}-\x{05BD}\x{05BF}-\x{05C2}\x{05C4}-\x{05C7}]
+    ord_c = ord(c)
+    return 0x0591 <= ord_c <= 0x5BD or 0x5BF <= ord_c <= 0x5C2 or 0x5C4 <= ord_c <= 0x5C7
+
+
 class EntityInfo:
     def __init__(self, indices: List[int], entity_type: str, line_info: LineInfo):
         self.word_indices = indices
@@ -24,9 +30,9 @@ class EntityInfo:
 
     @cached_property
     def name(self):
-        return self.line_info.get_name(self.word_start_index, self.word_end_index)
-        # return " ".join(self.line_info.words[self.word_start_index:self.word_end_index])
-
+        entity_name = self.line_info.get_name(self.word_start_index, self.word_end_index)
+        return "".join(filter(lambda c: not is_nikud(c), entity_name))
+    
     def print_name_and_type(self):
         print(f"Found entity = {self.name}, type = {self.entity_type}")
 
