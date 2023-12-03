@@ -1,4 +1,3 @@
-from typing import List
 from functools import cached_property
 from contextlib import AbstractContextManager
 
@@ -6,6 +5,8 @@ from ner.entity_persistency import EntityPersistency
 
 from ner.line_info import LineInfo
 from ner.entity_iterator import EntityInfo, ModelInfo, entities
+
+import pandas as pd
 
 
 class ReplacedLineBuilder(AbstractContextManager):
@@ -44,55 +45,70 @@ class ReplacedLineBuilder(AbstractContextManager):
         return self.updated_ln
 
 
-def replace_all_lines(src_lines: List[str], src, persistency):
-    res_lines = []
-    for i, l in enumerate(src_lines):
-        print(f"Processing line {i}/{len(src_lines)} from source {src}")
-        line_info = LineInfo(l)
+class EntityOperations:
+    def __init__(self, entity_json_file, checkpoint, source):
+        self.persistency = EntityPersistency(entity_db_location=entity_json_file)
+        self.model_info = ModelInfo(checkpoint)
+        self.source = source
+
+    def replace_entities_in_df(self, df: pd.DataFrame) -> pd.DataFrame:
+        he_sentences = df["HE_sentences"].to_list()
+
+        replaced_he_sentences = []
+        for i, l in enumerate(he_sentences):
+            print(f"Processing line {i}/{len(he_sentences)} from source {self.source}")
+            replaced_str = self.replace_entities_in_line(l)
+            replaced_he_sentences.append(replaced_str)
+
+        res_df = df.copy()
+        res_df["HE_sentences"] = replaced_he_sentences
+        return res_df
+
+    def replace_entities_in_line(self, ln: str) -> str:
+        line_info = LineInfo(ln)
         with ReplacedLineBuilder(line_info) as builder:
-            for entity_info in entities(model_info, line_info):
+            for entity_info in entities(self.model_info, line_info):
                 entity_info.print_name_and_type()
-                replacement_string = persistency.upsert_entity(entity_info.name, entity_info.entity_type, src)
+                replacement_string = self.persistency.upsert_entity(entity_info.name, entity_info.entity_type,
+                                                                    self.source)
                 builder.new_entity(entity_info, replacement_string)
-            res_lines.append(builder.built_line)
+            return builder.built_line
 
-    return res_lines
+    def scan_entities_in_df(self, df: pd.DataFrame):
+        he_sentences = df["HE_sentences"].to_list()
 
+        for i, l in enumerate(he_sentences):
+            print(f"Scanning line {i}/{len(he_sentences)} from source {self.source}")
+            self.scan_entities_in_line(l)
 
-def scan_all_lines(src_lines: List[str], src, persistency):
-    for i, l in enumerate(src_lines):
-        print(f"Scanning line {i}/{len(src_lines)} from source {src}: {l}")
-        line_info = LineInfo(l)
-        for entity_info in entities(model_info, line_info):
-            # if new entity
-            if persistency.get_entity(entity_info.name, entity_info.entity_type)[0] is None:
+    def scan_entities_in_line(self, ln: str):
+        line_info = LineInfo(ln)
+        for entity_info in entities(self.model_info, line_info):
+            if self.persistency.get_entity(entity_info.name, entity_info.entity_type)[0] is None:
                 entity_info.print_name_and_type()
-            persistency.upsert_entity(entity_info.name, entity_info.entity_type, src)
+            self.persistency.upsert_entity(entity_info.name, entity_info.entity_type, self.source)
 
 
 if __name__ == '__main__':
-    # ln1 = "מחקר במכון מוכוון מדיניות ותוצריו מיועדים לשמש את מקבלי ההחלטות במדינת ישראל ואת הציבור הרחב"
-    # ln2 = "הסכמה עם ראשי הממשל האמריקאי להפסקת ההתערבות ההדדית בתהליכים פוליטיים-פנימיים בשתי המדינות."
-    # ln3 = "לקדם את הרעיון של שיקום רצועת עזה, בהמשך לתהליך שהחל, לגיבוש הבנות עם החמאס לכינונה של תקופת רגיעה ממושכת."
-    # ln4 = "ישראל, נלחמת בעזה."
+    ln1 = "מחקר במכון מוכוון מדיניות ותוצריו מיועדים לשמש את מקבלי ההחלטות במדינת ישראל ואת הציבור הרחב"
+    ln2 = "הסכמה עם ראשי הממשל האמריקאי להפסקת ההתערבות ההדדית בתהליכים פוליטיים-פנימיים בשתי המדינות."
+    ln3 = "לקדם את הרעיון של שיקום רצועת עזה, בהמשך לתהליך שהחל, לגיבוש הבנות עם החמאס לכינונה של תקופת רגיעה ממושכת."
+    ln4 = "ישראל, נלחמת בעזה."
+    lines = [ln1, ln2, ln3, ln4]
 
+    entity_db_location = r"D:\translator\entities.json"
     model_checkpoint = r"D:\translator\checkpoint-4000"
-    model_info = ModelInfo(model_checkpoint)
-    persistency = EntityPersistency(entity_db_location=r"D:\translator\entities.json")
+    source = "inss"
+    en_op = EntityOperations(entity_db_location, model_checkpoint, source)
 
-    source = "wiki"
-    import pandas as pd
     input_pages_file = rf"D:\workspace\tr_data\{source}/all_pages.parquet"
     df = pd.read_parquet(input_pages_file)
-    lines = df["HE_sentences"].to_list()
 
-    # lines = [ln1, ln2, ln3, ln4]
-    # replaced_lines = replace_all_lines(lines, source, persistency)
-    scan_all_lines(lines, source, persistency)
-    print(lines)
-    # print(replaced_lines)
-    # df["HE_sentences"] = replaced_lines
-    # df.to_parquet(rf"D:\workspace\tr_data\{source}/all_pages_er.parquet")
+    en_op.scan_entities_in_df(df)
+    #en_op.scan_entities_in_line(ln1)
+    #en_op.scan_entities_in_line(ln2)
 
-    # print(persistency.get_all_source_entities("source"))
+    # res_df = en_op.replace_entities_in_df()
+    # res_df.to_parquet(rf"D:\workspace\tr_data\{source}/all_pages_er.parquet")
 
+    # print(persistency.get_all_source_entities("source"))hy
