@@ -71,34 +71,28 @@ def scan_all_lines(src_lines: List[str], src, persistency):
 
 
 if __name__ == '__main__':
-    ln1 = "מחקר במכון מוכוון מדיניות ותוצריו מיועדים לשמש את מקבלי ההחלטות במדינת ישראל ואת הציבור הרחב"
-    ln2 = "הסכמה עם ראשי הממשל האמריקאי להפסקת ההתערבות ההדדית בתהליכים פוליטיים-פנימיים בשתי המדינות."
-    ln3 = "לקדם את הרעיון של שיקום רצועת עזה, בהמשך לתהליך שהחל, לגיבוש הבנות עם החמאס לכינונה של תקופת רגיעה ממושכת."
-    ln4 = "ישראל, נלחמת בעזה."
+    # ln1 = "מחקר במכון מוכוון מדיניות ותוצריו מיועדים לשמש את מקבלי ההחלטות במדינת ישראל ואת הציבור הרחב"
+    # ln2 = "הסכמה עם ראשי הממשל האמריקאי להפסקת ההתערבות ההדדית בתהליכים פוליטיים-פנימיים בשתי המדינות."
+    # ln3 = "לקדם את הרעיון של שיקום רצועת עזה, בהמשך לתהליך שהחל, לגיבוש הבנות עם החמאס לכינונה של תקופת רגיעה ממושכת."
+    # ln4 = "ישראל, נלחמת בעזה."
 
     model_checkpoint = r"D:\translator\checkpoint-4000"
     model_info = ModelInfo(model_checkpoint)
     persistency = EntityPersistency(entity_db_location=r"D:\translator\entities.json")
 
-    source = "inss"
-    # import pandas as pd
-    # input_pages_file = rf"D:\workspace\tr_data\{source}/all_pages.parquet"
-    # df = pd.read_parquet(input_pages_file)
-    # lines = df["HE_sentences"].to_list()
+    source = "wiki"
+    import pandas as pd
+    input_pages_file = rf"D:\workspace\tr_data\{source}/all_pages.parquet"
+    df = pd.read_parquet(input_pages_file)
+    lines = df["HE_sentences"].to_list()
 
     # lines = [ln1, ln2, ln3, ln4]
-    lines = [
-        "ראש הממשלה נתניהו מסכם את מבצע 'בית וגן', 5 ביולי 2023",
-        "שסיפר על ידידו רס""ן א' שהביא איתו רחפן ובדרך לישוב ניר יצחק עצרו במתקן 'אורים' ועשו שימוש ברחפן על מנת לקבל תמונה של כוחות האויב בשטח ולפגוע בהם.",
-        "משתלבים במאמץ זה, בנוסף למהלך הראווה באמצעות הטיסן, גם פרסומים של הארגון ופעילותו במדיה החברתית, כולל סרטונים המציגים את יכולותיו המיוחדות (לאחרונה הופץ למשל סרטון על יחידת ""האלפיניסטים"" של הארגון)."
-    ]
-    replaced_lines = replace_all_lines(lines, source, persistency)
-    # scan_all_lines(lines, source, persistency)
+    # replaced_lines = replace_all_lines(lines, source, persistency)
+    scan_all_lines(lines, source, persistency)
     print(lines)
-    print(replaced_lines)
+    # print(replaced_lines)
     # df["HE_sentences"] = replaced_lines
     # df.to_parquet(rf"D:\workspace\tr_data\{source}/all_pages_er.parquet")
 
-    # print(persistency.get_all_source_entities("inss"))
-    # print(persistency.get_all_source_entities("teheran"))
-    # print(persistency.get_all_source_entities("wiki"))
+    # print(persistency.get_all_source_entities("source"))
+

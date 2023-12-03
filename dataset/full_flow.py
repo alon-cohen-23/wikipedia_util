@@ -96,7 +96,7 @@ def full_flow(input_path: str, input_name: str, output_root: str, steps: List[Fl
 
 
 if __name__ =='__main__':
-    full_flow(input_path=r"d:/workspace/tr_data/teheran/data", input_name="inss", output_root=r"d:/workspace/tr_data",
+    full_flow(input_path=r"d:/workspace/tr_data/inss/data", input_name="inss", output_root=r"d:/workspace/tr_data",
               steps=AllSteps)
 
 

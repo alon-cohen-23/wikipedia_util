@@ -32,7 +32,7 @@ class EntityInfo:
     def name(self):
         entity_name = self.line_info.get_name(self.word_start_index, self.word_end_index)
         return "".join(filter(lambda c: not is_nikud(c), entity_name))
-    
+
     def print_name_and_type(self):
         print(f"Found entity = {self.name}, type = {self.entity_type}")
 
