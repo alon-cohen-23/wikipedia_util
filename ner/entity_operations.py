@@ -1,77 +1,11 @@
-from typing import Iterator, List
-from functools import lru_cache, cached_property
+from typing import List
+from functools import cached_property
 from contextlib import AbstractContextManager
 
-
-import nltk
-from nltk.tokenize import NLTKWordTokenizer
-
-from ner.entity_predication import predict_entities, initialize_model_and_tokenizer
-from ner.entity_iterator import label_entity_iterator
 from ner.entity_persistency import EntityPersistency
 
-
-class LineInfo:
-    def __init__(self, line):
-        self.line = line
-        self.words = nltk.word_tokenize(line)
-        self.word_spans = list(NLTKWordTokenizer().span_tokenize(line))
-
-    @lru_cache
-    def start(self, word_start_index):
-        return self.word_spans[word_start_index][0]
-
-    @lru_cache
-    def end(self, word_end_index):
-        return self.word_spans[word_end_index - 1][1]
-
-
-class EntityInfo:
-    def __init__(self, indices: List[int], entity_type: str, line_info: LineInfo):
-        self.word_indices = indices
-        self.entity_type = entity_type
-        self.line_info = line_info
-
-    @cached_property
-    def word_start_index(self):
-        return self.word_indices[0]
-
-    @cached_property
-    def word_end_index(self):
-        return self.word_indices[-1] + 1
-
-    @cached_property
-    def name(self):
-        return " ".join(self.line_info.words[self.word_start_index:self.word_end_index])
-
-    def print_name_and_type(self):
-        print(f"Found entity = {self.name}, type = {self.entity_type}")
-
-
-class ModelInfo:
-    def __init__(self, checkpoint):
-        self.checkpoint = checkpoint
-
-    @cached_property
-    def tokenizer_model(self):
-        return initialize_model_and_tokenizer(self.checkpoint)
-
-    def predict(self, line_info: LineInfo):
-        t, m = self.tokenizer_model
-        labels = predict_entities(m, t, words=line_info.words)
-        return labels
-
-
-def entities(model_info: ModelInfo, line_info: LineInfo) -> Iterator[EntityInfo]:
-    """
-    Iterator that returns an EntityInfo class for each entity returned by label_entity_iterator
-    """
-    labels = model_info.predict(line_info)
-    for (indices, entity_type) in label_entity_iterator(labels):
-        entity_info = EntityInfo(indices, entity_type, line_info)
-        entity_info.print_name_and_type()
-
-        yield entity_info
+from ner.line_info import LineInfo
+from ner.entity_iterator import EntityInfo, ModelInfo, entities
 
 
 class ReplacedLineBuilder(AbstractContextManager):
@@ -109,17 +43,31 @@ class ReplacedLineBuilder(AbstractContextManager):
             return self.line_info.line
         return self.updated_ln
 
-def replace_all_lines(lines: List[str], source, persistency):
-    replaced_lines = []
-    for l in lines:
+
+def replace_all_lines(src_lines: List[str], src, persistency):
+    res_lines = []
+    for i, l in enumerate(src_lines):
+        print(f"Processing line {i}/{len(src_lines)} from source {src}")
         line_info = LineInfo(l)
         with ReplacedLineBuilder(line_info) as builder:
             for entity_info in entities(model_info, line_info):
-                replacement_string = persistency.upsert_entity(entity_info.name, entity_info.entity_type, source)
+                entity_info.print_name_and_type()
+                replacement_string = persistency.upsert_entity(entity_info.name, entity_info.entity_type, src)
                 builder.new_entity(entity_info, replacement_string)
-            replaced_lines.append(builder.built_line)
+            res_lines.append(builder.built_line)
 
-    return replaced_lines
+    return res_lines
+
+
+def scan_all_lines(src_lines: List[str], src, persistency):
+    for i, l in enumerate(src_lines):
+        print(f"Scanning line {i}/{len(src_lines)} from source {src}: {l}")
+        line_info = LineInfo(l)
+        for entity_info in entities(model_info, line_info):
+            # if new entity
+            if persistency.get_entity(entity_info.name, entity_info.entity_type)[0] is None:
+                entity_info.print_name_and_type()
+            persistency.upsert_entity(entity_info.name, entity_info.entity_type, src)
 
 
 if __name__ == '__main__':
@@ -133,24 +81,24 @@ if __name__ == '__main__':
     persistency = EntityPersistency(entity_db_location=r"D:\translator\entities.json")
 
     source = "inss"
-    import pandas as pd
-    input_pages_file = rf"D:\workspace\tr_data\{source}/all_pages.parquet"
-    df = pd.read_parquet(input_pages_file)
-    lines = df["HE_sentences"].to_list()
+    # import pandas as pd
+    # input_pages_file = rf"D:\workspace\tr_data\{source}/all_pages.parquet"
+    # df = pd.read_parquet(input_pages_file)
+    # lines = df["HE_sentences"].to_list()
 
-    #lines = [ln1, ln2, ln3, ln4]
-    # lines = [
-    #     'אסור לנו להרפות מהחטטנים העלובים האלה.', 'את יכולה לבוא למטבח לעזור לי?', 'את צריכה גם את עזרתי?',
-    #     'אקרא לך כשזה יהיה מוכן.', 'אני מתנצלת על מה שקורה עם ראזיה.',
-    #     'לא יודעת איך הילדה שלי נכנסה לשיגעון הזה של הסטודנטים האסלאמיסטים.',
-    # ]
-    #lines = ['- בת ים, ישראל - עיני האחת נשואה לירושלים" "והשניה לאיספהאן. ', 'תני לי דחוף את רפאל-. ']
+    # lines = [ln1, ln2, ln3, ln4]
+    lines = [
+        "ראש הממשלה נתניהו מסכם את מבצע 'בית וגן', 5 ביולי 2023",
+        "שסיפר על ידידו רס""ן א' שהביא איתו רחפן ובדרך לישוב ניר יצחק עצרו במתקן 'אורים' ועשו שימוש ברחפן על מנת לקבל תמונה של כוחות האויב בשטח ולפגוע בהם.",
+        "משתלבים במאמץ זה, בנוסף למהלך הראווה באמצעות הטיסן, גם פרסומים של הארגון ופעילותו במדיה החברתית, כולל סרטונים המציגים את יכולותיו המיוחדות (לאחרונה הופץ למשל סרטון על יחידת ""האלפיניסטים"" של הארגון)."
+    ]
     replaced_lines = replace_all_lines(lines, source, persistency)
+    # scan_all_lines(lines, source, persistency)
     print(lines)
     print(replaced_lines)
-    df["HE_sentences"] = replaced_lines
-    df.to_parquet(rf"D:\workspace\tr_data\{source}/all_pages_er.parquet")
+    # df["HE_sentences"] = replaced_lines
+    # df.to_parquet(rf"D:\workspace\tr_data\{source}/all_pages_er.parquet")
+
     # print(persistency.get_all_source_entities("inss"))
     # print(persistency.get_all_source_entities("teheran"))
     # print(persistency.get_all_source_entities("wiki"))
-
