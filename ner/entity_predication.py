@@ -27,7 +27,9 @@ def predict_row(row: List[str], tokenizer, model, gpu=False):
 def initialize_model_and_tokenizer(model_checkpoint, gpu=False):
     tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
     model = AutoModelForTokenClassification.from_pretrained(model_checkpoint)
-    if not gpu:
+    if gpu:
+        model = model.to('cuda')
+    else:
         model = model.to('cpu')
 
     return tokenizer, model

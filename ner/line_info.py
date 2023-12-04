@@ -21,6 +21,8 @@ class LineInfo:
         line_entity_end = end
 
         while True:
+            if line_entity_start >= len(self.line):
+                break
             s = self.line[line_entity_start]
             if s not in punctuation:
                 break
@@ -28,6 +30,8 @@ class LineInfo:
 
         # since the input indices are a Python slice, the end is actually +1
         while True:
+            if line_entity_end < 0:
+                break
             e = self.line[line_entity_end-1]
             if e not in punctuation:
                 break
