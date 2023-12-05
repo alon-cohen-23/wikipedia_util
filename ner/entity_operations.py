@@ -74,11 +74,11 @@ class EntityOperations:
                 builder.new_entity(entity_info, replacement_string)
             return builder.built_line
 
-    def scan_entities_in_df(self, df: pd.DataFrame):
-        he_sentences = df["HE_sentences"].to_list()
+    def scan_entities_in_df(self, df: pd.DataFrame, start_index=0):
+        he_sentences = df[start_index:]["HE_sentences"].to_list()
 
         for i, l in enumerate(he_sentences):
-            print(f"Scanning line {i}/{len(he_sentences)} from source {self.source}")
+            print(f"Scanning line {i+start_index}/{len(he_sentences)} from source {self.source}")
             self.scan_entities_in_line(l)
 
     def scan_entities_in_line(self, ln: str):
