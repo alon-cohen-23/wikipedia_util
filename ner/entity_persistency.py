@@ -23,15 +23,31 @@ class EntityDB:
         self.new_name = new_name
         self.sources: List[SourceDB] = []
 
-    def update_source(self, source: str):
+    def find_source_index(self, source) -> int:
         source_loc = -1
         for i, s in enumerate(self.sources):
             if s.sname == source:
                 source_loc = i
+
+        return source_loc
+
+    def find_source(self, source) -> SourceDB | None:
+        source_loc = self.find_source_index(source)
         if source_loc >= 0:
-            self.sources[source_loc].count += 1
+            return self.sources[source_loc]
+        return None
+
+    def update_source(self, source: str, count=1):
+        source_loc = self.find_source_index(source)
+
+        if source_loc >= 0:
+            self.sources[source_loc].count += count
         else:
-            self.sources.append(SourceDB(source, 1))
+            self.sources.append(SourceDB(source, count))
+
+    def update_sources(self, sources: List[SourceDB]):
+        for s in sources:
+            self.update_source(s.sname, s.count)
 
     def to_dict(self):
         d = {'name': self.name, 'type': self.type, 'new_name': self.new_name, 'sources': []}
@@ -54,10 +70,13 @@ class EntityDB:
 
 class EntityPersistency:
     def __init__(self, entity_db_location):
-        db = TinyDB(entity_db_location, ensure_ascii=False, encoding='utf-8')
-        self.db = db.table("entities")
-        self.db_state_table = db.table("state")
+        self.db = TinyDB(entity_db_location, ensure_ascii=False, encoding='utf-8')
+        self.db_entities_table = self.db.table("entities")
+        self.db_state_table = self.db.table("state")
         self.last_count = self.get_last_count()
+
+    def close(self):
+        self.db.close()
 
     def get_last_count(self):
         res = self.db_state_table.all()
@@ -73,7 +92,7 @@ class EntityPersistency:
 
     def get_entity(self, entity_name: str, type: str) -> Tuple[EntityDB | None, int]:
         Entities = Query()
-        res = self.db.search((Entities.name == entity_name) & (Entities.type == type))
+        res = self.db_entities_table.search((Entities.name == entity_name) & (Entities.type == type))
         if not res:
             return None, 0
 
@@ -94,33 +113,42 @@ class EntityPersistency:
         return new_name
 
     def upsert_entity(self, name: str, type: str, source: str) -> str:
-        e, id = self.get_entity(name, type)
+        entity = EntityDB(name, type)
+        entity.update_source(source, 1)
+        return self.upsert_entity_db(entity)
+
+    def upsert_entity_db(self, entity: EntityDB) -> str:
+        e, id = self.get_entity(entity.name, entity.type)
         if e:
-            e.update_source(source)
-            self.db.update({'sources': [s.to_dict() for s in e.sources]}, doc_ids=[id])
+            e.update_sources(entity.sources)
+            self.db_entities_table.update({'sources': [s.to_dict() for s in e.sources]}, doc_ids=[id])
         else:
-            e = EntityDB(name, type, self.create_new_name())
-            e.sources.append(SourceDB(source, 1))
-            self.db.insert(e.to_dict())
-        return e.new_name
+            entity.new_name = self.create_new_name()
+            self.db_entities_table.insert(entity.to_dict())
+
+        return entity.new_name
 
     def get_all_source_entities(self, source: str):
         Entities = Query()
         Sources = Query()
-        res = self.db.search(Entities.sources.any(Sources.name == source))
+        res = self.db_entities_table.search(Entities.sources.any(Sources.sname == source))
         return res
+
+    def all_entities(self):
+        for e in self.db_entities_table.all():
+            yield EntityDB.from_dict(e)
+
+    def merge(self, other: 'EntityPersistency'):
+        for e in other.all_entities():
+            self.upsert_entity_db(e)
 
 
 if __name__ == '__main__':
     persistency = EntityPersistency(entity_db_location=r"D:\translator\entities_test.json")
-    persistency.upsert_entity("ישראל", "Location", "source1")
-    persistency.upsert_entity("ישראל", "Location", "source2")
-    persistency.upsert_entity("ישראל", "Person", "source1")
-    persistency.upsert_entity("יעקב", "Person", "source1")
-    persistency.upsert_entity(name="بدنا_كهربا", type="Organization", source="source1")
-
-    print(persistency.get_new_name("ישראל", "Person"))
-    print(persistency.get_new_name("ישראל", "Location"))
 
     print(persistency.get_all_source_entities("source1"))
     print(persistency.get_all_source_entities("source2"))
+
+    for e in persistency.all_entities():
+        print(e.name)
+
