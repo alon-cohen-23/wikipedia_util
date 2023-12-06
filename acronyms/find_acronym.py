@@ -41,6 +41,7 @@ class AcronymPersistency:
     def upsert(self, name: str, source: str):
         e = AcronymDB(name)
         e.update_source(source, 1)
+        print(f"Add acronym {name} from source {source}")
         self.upsert_db(e)
 
     def upsert_db(self, acronym: AcronymDB):
@@ -49,8 +50,16 @@ class AcronymPersistency:
             e.update_sources(acronym.sources)
             self.db_acronyms_table.update({'sources': [s.to_dict() for s in e.sources]}, doc_ids=[id])
         else:
-            print(f"Add acronym {acronym.name} from source {source}")
             self.db_acronyms_table.insert(acronym.to_dict())
+
+    def all_acronyms(self):
+        for e in self.db_acronyms_table.all():
+            yield AcronymDB.from_dict(e)
+
+    def merge(self, other: 'AcronymPersistency'):
+        for e in other.all_acronyms():
+            print(f"Merging acronym {e.name}")
+            self.upsert_db(e)
 
 
 class AcronymScanner:
@@ -59,6 +68,9 @@ class AcronymScanner:
         self.persistency = persistency
 
     def scan_acronyms_in_line(self, ln):
+        if not ln:
+            return
+
         pattern = r'\b(?P<acronym>\p{Hebrew}+\"\p{Hebrew}\p{Hebrew}*)\b'
         found = regex.findall(pattern, ln)
         if not found:
@@ -76,15 +88,27 @@ class AcronymScanner:
 
 
 if __name__ == "__main__":
-    source = "wiki"
-    #input_pages_file = rf"D:\workspace\tr_data\{source}/all_pages.parquet"
-    input_pages_file = rf"D:\workspace\tr_data\{source}/translated_40000_values.parquet"
+    source = "fauda"
+
+    input_pages_file = rf"D:\workspace\tr_data\{source}/all_pages.parquet"
+    #input_pages_file = rf"D:\workspace\tr_data\{source}/translated_40000_values.parquet"
     df = pd.read_parquet(input_pages_file)
 
-    persistency = AcronymPersistency(db_location=r"D:\translator\acronyms_test.json")
+    persistency = AcronymPersistency(db_location=rf"D:\translator\acronyms_{source}.json")
     scanner = AcronymScanner(source, persistency)
+
+    #print("from line:")
+    #line = 'המכ"ם ועוד נ"צ ועוד מטק"א'
+    #line = "... התוכן המצחיק של הערך/דף השיחה ..."
+    #scanner.scan_acronyms_in_line(line)
+
     scanner.scan_acronyms_in_df(df)
 
-    # print("from line:")
-    # line = 'המכ"ם ועוד נ"צ ועוד מטק"א'
-    # scanner.scan_acronyms_in_line(line)
+    # persistency_wiki = AcronymPersistency(db_location=r"D:\translator\acronyms\acronyms_wiki.json")
+    # persistency_inss = AcronymPersistency(db_location=r"D:\translator\acronyms\acronyms_inss.json")
+    # persistency_fauda = AcronymPersistency(db_location=r"D:\translator\acronyms\acronyms_fauda.json")
+    # persistency_teheran = AcronymPersistency(db_location=r"D:\translator\acronyms\acronyms_teheran.json")
+    # persistency = AcronymPersistency(db_location=r"D:\translator\acronyms\acronyms.json")
+    # persistency.merge(persistency_inss)
+    # persistency.merge(persistency_teheran)
+    # persistency.merge(persistency_fauda)
