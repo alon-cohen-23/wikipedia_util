@@ -1,70 +1,25 @@
 from tinydb import TinyDB, Query
 
 from typing import List, Tuple
+from dataset.persistency.source_db import SourceDB
+from dataset.persistency.entry_db import EntryDB
 
 
-class SourceDB:
-    def __init__(self, sname, count=0):
-        self.sname = sname
-        self.count = count
-
-    def to_dict(self):
-        return {'sname': self.sname, 'count': self.count}
-
-    @staticmethod
-    def from_dict(d):
-        return SourceDB(d['sname'], d['count'])
-
-
-class EntityDB:
+class EntityDB(EntryDB):
     def __init__(self, name, type=None, new_name=""):
         self.name = name
         self.type = type
         self.new_name = new_name
-        self.sources: List[SourceDB] = []
+        super(EntityDB, self).__init__()
 
-    def find_source_index(self, source) -> int:
-        source_loc = -1
-        for i, s in enumerate(self.sources):
-            if s.sname == source:
-                source_loc = i
-
-        return source_loc
-
-    def find_source(self, source) -> SourceDB | None:
-        source_loc = self.find_source_index(source)
-        if source_loc >= 0:
-            return self.sources[source_loc]
-        return None
-
-    def update_source(self, source: str, count=1):
-        source_loc = self.find_source_index(source)
-
-        if source_loc >= 0:
-            self.sources[source_loc].count += count
-        else:
-            self.sources.append(SourceDB(source, count))
-
-    def update_sources(self, sources: List[SourceDB]):
-        for s in sources:
-            self.update_source(s.sname, s.count)
-
-    def to_dict(self):
-        d = {'name': self.name, 'type': self.type, 'new_name': self.new_name, 'sources': []}
-
-        for s in self.sources:
-            d['sources'].append(s.to_dict())
-
-        return d
+    def _to_dict(self):
+        return {'name': self.name, 'type': self.type, 'new_name': self.new_name}
 
     @staticmethod
-    def from_dict(d):
+    def _from_dict(d):
         e = EntityDB(d['name'])
         e.type = d['type']
         e.new_name = d['new_name']
-        e.sources = []
-        for s in d['sources']:
-            e.sources.append(SourceDB.from_dict(s))
         return e
 
 

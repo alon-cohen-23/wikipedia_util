@@ -5,6 +5,9 @@ from dataset.df_process import filter_sentences_df, split_df, create_concatenate
 from dataset.gtranslate_selenium import google_translate_folder_of_excels
 from dataset.text_files.read_and_translate_text_files import read_all_files
 
+from ner.entity_operations import replace_entities
+
+
 from enum import Enum, auto
 from typing import List
 
@@ -66,8 +69,9 @@ def full_flow(input_path: str, input_name: str, output_root: str, steps: List[Fl
     else:
         df = pd.read_parquet(input_pages_file)
 
-    # if FlowSteps.ReplaceEntitiesInInput in steps:
-    #     pass
+    if FlowSteps.ReplaceEntitiesInInput in steps:
+        # TODO: pass entities db location as parameter
+        df = replace_entities(df, source=input_name, entity_db_location=r"D:\translator\entities.json")
 
     # step: split the df for Google translate
     if FlowSteps.SplitIntoFilesForGoogleTranslate in steps:
