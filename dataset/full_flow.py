@@ -30,14 +30,16 @@ def full_flow(input_path, input_name, output_root, steps):
     :param output_root: root directory for all the output files
     :param steps: list of steps (range 1->6).
     """
-    Path(f"{output_root}/{input_name}/he_tr_excel").mkdir(parents=True, exist_ok=True)
-    Path(f"{output_root}/{input_name}/en_tr_excel").mkdir(parents=True, exist_ok=True)
+    output_dir = Path(output_root)
+    output_named = output_dir / f"{input_name}"
+    he_folder_path = output_named / "he_tr_excel"
+    en_folder_path = output_named / "en_tr_excel"
+    he_folder_path.mkdir(parents=True, exist_ok=True)
+    en_folder_path.mkdir(parents=True, exist_ok=True)
 
-    input_pages_file = f"{output_root}/{input_name}/all_pages.parquet"
-    he_folder_path = f"{output_root}/{input_name}/he_tr_excel"
-    en_folder_path = f"{output_root}/{input_name}/en_tr_excel"
-    output_translated_file = f"{output_root}/{input_name}/translated_{input_name}.parquet"
-    output_translated_file_final = f"{output_root}/{input_name}/translated_{input_name}_final.parquet"
+    input_pages_file = output_named / "all_pages.parquet"
+    output_translated_file = output_named / "translated_{input_name}.parquet"
+    output_translated_file_final = output_named / "translated_{input_name}_final.parquet"
 
     # step 1: prepare the df
     if 1 in steps:
@@ -76,8 +78,6 @@ def full_flow(input_path, input_name, output_root, steps):
         en_he_df.to_parquet(output_translated_file_final)
 
 
-if __name__ =='__main__':
+if __name__ == '__main__':
     full_flow(input_path=r"/workspace/translation/inss/data", input_name="inss", output_root=r"/workspace/translation",
               steps=[1, 2, 3, 4, 5, 6])
-
-

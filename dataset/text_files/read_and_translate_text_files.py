@@ -16,6 +16,7 @@ def read_file(file_name):
         lines = data.split('\n')
         sentences = []
         for line in lines:
+            # TODO: you are reading from the disk the tokenizer for each sentence - inefficient
             sentences.extend(sent_tokenize(line))
         return sentences
 
@@ -29,7 +30,6 @@ def read_all_files(start_dir) -> pd.DataFrame:
     return sentences_df
 
 
-if __name__ =='__main__':
-    sentences = read_file(r"d:\workspace\tr_data\INSS\data\antisemitism-education.txt")
-    print(sentences)
-
+if __name__ == '__main__':
+    curr_sentences = read_file(r"d:\workspace\tr_data\INSS\data\antisemitism-education.txt")
+    print(curr_sentences)
