@@ -9,6 +9,9 @@ from ner.entity_iterator import EntityInfo, ModelInfo, entities
 import pandas as pd
 
 
+MODEL_CHECKPOINT = r"D:\translator\checkpoint-4000"
+
+
 class ReplacedLineBuilder(AbstractContextManager):
     """
     Build the "replaced" line. Notice how:
@@ -46,9 +49,9 @@ class ReplacedLineBuilder(AbstractContextManager):
 
 
 class EntityOperations:
-    def __init__(self, entity_json_file, checkpoint, source):
+    def __init__(self, entity_json_file, source):
         self.persistency = EntityPersistency(entity_db_location=entity_json_file)
-        self.model_info = ModelInfo(checkpoint)
+        self.model_info = ModelInfo(MODEL_CHECKPOINT)
         self.source = source
 
     def replace_entities_in_df(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -56,7 +59,7 @@ class EntityOperations:
 
         replaced_he_sentences = []
         for i, l in enumerate(he_sentences):
-            print(f"Processing line {i}/{len(he_sentences)} from source {self.source}")
+            print(f"Processing line {i+1}/{len(he_sentences)} from source {self.source}")
             replaced_str = self.replace_entities_in_line(l)
             replaced_he_sentences.append(replaced_str)
 
@@ -78,7 +81,7 @@ class EntityOperations:
         he_sentences = df[start_index:]["HE_sentences"].to_list()
 
         for i, l in enumerate(he_sentences):
-            print(f"Scanning line {i+start_index}/{len(he_sentences)} from source {self.source}")
+            print(f"Scanning line {i+start_index+1}/{len(he_sentences)} from source {self.source}")
             self.scan_entities_in_line(l)
 
     def scan_entities_in_line(self, ln: str):
@@ -89,6 +92,11 @@ class EntityOperations:
             self.persistency.upsert_entity(entity_info.name, entity_info.entity_type, self.source)
 
 
+def replace_entities(df, source, entity_db_location):
+    en_op = EntityOperations(entity_db_location, source)
+    return en_op.replace_entities_in_df(df)
+
+
 if __name__ == '__main__':
     ln1 = "מחקר במכון מוכוון מדיניות ותוצריו מיועדים לשמש את מקבלי ההחלטות במדינת ישראל ואת הציבור הרחב"
     ln2 = "הסכמה עם ראשי הממשל האמריקאי להפסקת ההתערבות ההדדית בתהליכים פוליטיים-פנימיים בשתי המדינות."
@@ -97,9 +105,8 @@ if __name__ == '__main__':
     lines = [ln1, ln2, ln3, ln4]
 
     entity_db_location = r"D:\translator\entities.json"
-    model_checkpoint = r"D:\translator\checkpoint-4000"
     source = "inss"
-    en_op = EntityOperations(entity_db_location, model_checkpoint, source)
+    en_op = EntityOperations(entity_db_location, source)
 
     input_pages_file = rf"D:\workspace\tr_data\{source}/all_pages.parquet"
     df = pd.read_parquet(input_pages_file)
