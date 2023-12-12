@@ -1,3 +1,5 @@
+import random
+import re
 from functools import partial
 from typing import List
 
@@ -9,6 +11,8 @@ from transformers import AutoTokenizer, AutoModelForTokenClassification, Trainin
 from transformers import DataCollatorForTokenClassification
 
 from datasets import Dataset, load_metric, DatasetDict
+
+from ner.entity_labels import EntityLabels
 
 
 # https://github.com/huggingface/notebooks/blob/main/examples/token_classification.ipynb
@@ -69,7 +73,7 @@ def get_labels_maps():
     label_map = {'O': 'O',
                  'B-ORG': 'B-ORG', 'S-ORG': 'B-ORG', 'I-ORG': 'I-ORG', 'E-ORG': 'I-ORG',
                  'B-PER': 'B-PER', 'S-PER': 'B-PER', 'I-PER': 'B-PER', 'E-PER': 'I-PER',
-                 'B-GPE': 'B-ORG', 'S-GPE': 'B-ORG', 'I-GPE': 'I-ORG', 'E-GPE': 'I-ORG',
+                 'B-GPE': 'B-LOC', 'S-GPE': 'B-LOC', 'I-GPE': 'I-LOC', 'E-GPE': 'I-LOC',
                  'B-LOC': 'B-LOC', 'S-LOC': 'B-LOC', 'I-LOC': 'I-LOC', 'E-LOC': 'I-LOC',
                  'B-FAC': 'B-MISC', 'S-FAC': 'B-MISC', 'I-FAC': 'I-MISC', 'E-FAC': 'I-MISC',
                  'B-DUC': 'I-MISC', 'S-DUC': 'B-MISC', 'I-DUC': 'I-MISC', 'E-DUC': 'I-MISC',
@@ -127,13 +131,13 @@ def main():
     model = AutoModelForTokenClassification.from_pretrained(model_checkpoint, num_labels=len(label_list))
     model_name = model_checkpoint.split("/")[-1]
     args = TrainingArguments(
-        # output_dir=str(out_dir),
-        f"{model_name}-finetuned-{task}",
+        output_dir=str(out_dir),
+        # f"{model_name}-finetuned-{task}",
         evaluation_strategy="epoch",
         learning_rate=2e-5,
         per_device_train_batch_size=batch_size,
         per_device_eval_batch_size=batch_size,
-        num_train_epochs=15,
+        num_train_epochs=30,
         weight_decay=0.01,
         report_to=[]
     )
@@ -149,6 +153,47 @@ def main():
         compute_metrics=partial(compute_metrics, metric=metric, label_list=label_list)
     )
     trainer.train()
+
+
+def replace_ner(sets_dict: dict[str, tuple[set, list]], ner_prediction, sentence):
+    ner_index: List[tuple[int, int, bool]] = []
+    start_person = -1
+    start_location = -1
+    for index, label in enumerate(ner_prediction):
+        if label == EntityLabels.BeginPerson:
+            if start_person >= 0:
+                ner_index.append((start_person, index, False))
+            start_person = index
+        elif label != EntityLabels.EndPerson and start_person >= 0:
+            ner_index.append((start_person, index, False))
+            start_person = -1
+        if label == EntityLabels.BeginLoc:
+            if start_location >= 0:
+                ner_index.append((start_location, index, True))
+            start_location = index
+        elif label != EntityLabels.EndLoc and start_location >= 0:
+            ner_index.append((start_location, index, True))
+            start_location = -1
+    new_sentence = []
+    last_index = 0
+    for t in ner_index:
+        new_sentence.extend(sentence[last_index: t[0]])
+        # TODO: deal with "כלב"
+        if t[2]:
+            ner_type = 'locations'
+        else:
+            ner_type = 'first_names'
+        ner = random.sample(sets_dict[ner_type][1], 1)[0]
+        current_ner = sentence[t[0]]
+        o = re.search('^([משלוב]|כש)', current_ner)
+        if o is not None:
+            possible_ner = current_ner[o.end():]
+            if possible_ner in sets_dict[ner_type][0]:
+                ner = current_ner[: o.end()] + ner
+        new_sentence.append(ner)
+        last_index = t[1]
+    new_sentence.extend(sentence[last_index:])
+    return new_sentence
 
 
 def test(model_checkpoint, test_file):
@@ -185,8 +230,59 @@ def test(model_checkpoint, test_file):
     print(results)
 
 
+def align_results(tok_out, res, sentence):
+    word_map = tok_out.word_ids()
+    labels = [-1] * (1 + max([t for t in tok_out.word_ids() if t is not None]))
+    sentence_list = []
+    for i, index in enumerate(word_map):
+        if index is None:
+            continue
+        o = tok_out.token_to_chars(i)
+        if labels[index] < 0:
+            sentence_list.append(sentence[o.start: o.end])
+        else:
+            sentence_list[-1] += sentence[o.start: o.end]
+
+        if labels[index] < 1:
+            labels[index] = res[i]
+
+    return labels, sentence_list
+
+
+def one_sentence(tokenizer, model, sentence):
+    tok_out = tokenizer(sentence)
+    res = model(torch.tensor([tok_out['input_ids']]),
+                attention_mask=torch.tensor([tok_out['attention_mask']]))
+    predicted_labels = res.logits.argmax(dim=-1).detach().numpy()[0]
+    labels, sentence_list = align_results(tok_out, predicted_labels, sentence)
+    return [EntityLabels(e) for e in labels], sentence_list
+
+
+def load_models(model_checkpoint):
+    tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
+    model = AutoModelForTokenClassification.from_pretrained(model_checkpoint)
+    return tokenizer, model
+
+
+def check_ner_replacement():
+    tokenizer, model = load_models(
+        r"/home/urihein/PycharmProjects/wikipedia_util/ner/HeRo-finetuned-ner/checkpoint-5500")
+    data_path = Path(r"/home/urihein/data")
+    sentence = 'כשאלכס ויותם הלכו לתל-אביב לפגוש את יוסי ויוני הם ראו צבי'
+
+    name_location_sets = {}
+    for n in ['first_names', 'last_names', 'locations']:
+        f = data_path / f"{n}.txt"
+        s = set(f.read_text('utf-8').split(', '))
+        name_location_sets[n] = (s, list(s))
+
+    labels, sentence_list = one_sentence(tokenizer, model, sentence)
+    new_sentence = replace_ner(name_location_sets, labels, sentence_list)
+    print(new_sentence)
+
 
 if __name__ == "__main__":
     # main()
-    test(r"/home/urihein/PycharmProjects/wikipedia_util/ner/HeRo-finetuned-ner/checkpoint-4000",
-         r"/home/urihein/Downloads/token-single_gold_test.bmes")
+    # test(r"/home/urihein/PycharmProjects/wikipedia_util/ner/HeRo-finetuned-ner/checkpoint-5500",
+    #      r"/home/urihein/Downloads/token-single_gold_test.bmes")
+    check_ner_replacement()

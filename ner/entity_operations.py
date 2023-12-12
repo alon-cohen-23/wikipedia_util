@@ -104,7 +104,7 @@ if __name__ == '__main__':
     ln4 = "ישראל, נלחמת בעזה."
     lines = [ln1, ln2, ln3, ln4]
 
-    entity_db_location = r"D:\translator\entities.json"
+    entity_db_location = r"/home/urihein/Downloads/entities_fauda_teheran_inss.json"
     source = "inss"
     en_op = EntityOperations(entity_db_location, source)
 
