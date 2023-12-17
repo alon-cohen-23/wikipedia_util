@@ -176,7 +176,8 @@ def replace_ner(sets_dict: dict[str, tuple[set, list]], ner_prediction, sentence
             start_location = -1
     new_sentence = []
     last_index = 0
-    for t in ner_index:
+    counter = 0
+    for ind, t in enumerate(ner_index):
         new_sentence.extend(sentence[last_index: t[0]])
         # TODO: deal with "כלב"
         if t[2]:
@@ -186,14 +187,35 @@ def replace_ner(sets_dict: dict[str, tuple[set, list]], ner_prediction, sentence
         ner = random.sample(sets_dict[ner_type][1], 1)[0]
         current_ner = sentence[t[0]]
         o = re.search('^([משלוב]|כש)', current_ner)
-        if o is not None:
-            possible_ner = current_ner[o.end():]
-            if possible_ner in sets_dict[ner_type][0]:
-                ner = current_ner[: o.end()] + ner
-        new_sentence.append(ner)
         last_index = t[1]
+        if o is None:
+            if current_ner == 'אבו':
+                ner = current_ner + " " + ner
+                last_index = t[0] + 2
+                if len(ner_index) > ind + 1 and ner_index[ind + 1][0] == t[0] + 1:
+                    break
+            # We replace only if we identify the ner
+            if current_ner not in sets_dict[ner_type][0]:
+                ner = current_ner
+            else:
+                counter += 1
+        else:
+            possible_ner = current_ner[o.end():]
+            # We replace only if we identify the ner
+            if possible_ner == 'אבו':
+                ner = current_ner + " " + ner
+                last_index = t[0] + 2
+                if len(ner_index) > ind + 1 and ner_index[ind + 1][0] == t[0] + 1:
+                    break
+            elif possible_ner in sets_dict[ner_type][0]:
+                ner = current_ner[: o.end()] + ner
+            elif current_ner in sets_dict[ner_type][0]:
+                counter += 1
+            else:
+                ner = current_ner
+        new_sentence.append(ner)
     new_sentence.extend(sentence[last_index:])
-    return new_sentence
+    return " ".join(new_sentence), counter
 
 
 def test(model_checkpoint, test_file):
@@ -268,17 +290,26 @@ def check_ner_replacement():
     tokenizer, model = load_models(
         r"/home/urihein/PycharmProjects/wikipedia_util/ner/HeRo-finetuned-ner/checkpoint-5500")
     data_path = Path(r"/home/urihein/data")
-    sentence = 'כשאלכס ויותם הלכו לתל-אביב לפגוש את יוסי ויוני הם ראו צבי'
-
+    # iter_in = ['כשאלכס ויותם הלכו לתל-אביב לפגוש את יוסי ויוני הם ראו צבי']
+    # iter_in = ['רק שלשום הוא נתן את הכסף הזה לבאשיר.']
+    df = pd.read_parquet(r"/home/urihein/Downloads/all_pages.parquet")
+    iter_in = df.iloc[:, 1]
     name_location_sets = {}
     for n in ['first_names', 'last_names', 'locations']:
         f = data_path / f"{n}.txt"
-        s = set(f.read_text('utf-8').split(', '))
+        s = set(f.read_text('utf-8').strip().split(', '))
         name_location_sets[n] = (s, list(s))
-
-    labels, sentence_list = one_sentence(tokenizer, model, sentence)
-    new_sentence = replace_ner(name_location_sets, labels, sentence_list)
-    print(new_sentence)
+    res = []
+    for i, sentence in enumerate(iter_in):
+        if i % 100 == 0:
+            print(f"{i} / {len(iter_in)}")
+        labels, sentence_list = one_sentence(tokenizer, model, sentence)
+        new_sentence, number_of_replacement = replace_ner(name_location_sets, labels, sentence_list)
+        if number_of_replacement > 0:
+            res.append((sentence, new_sentence, number_of_replacement))
+    res_df = pd.DataFrame(res)
+    print(f"Create {res_df.shape[0]} new sentences from {len(iter_in)} sentences")
+    res_df.to_csv(r"/home/urihein/Downloads/all_pages_res.csv")
 
 
 if __name__ == "__main__":
