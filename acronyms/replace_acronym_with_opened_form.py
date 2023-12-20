@@ -99,6 +99,29 @@ def search_acronym_container(word, acronyms_container):
         return None
 
 
+def identify_possible_word_parts(word, last_index_indicator = None):
+    prefixes = ['מ','ש','ה','ו','כ','ל','ב']
+    if last_index_indicator is not None:
+        last_possible_prefix_index = word.find(last_index_indicator)
+    else:
+        last_possible_prefix_index = len(word)
+    for prefix_end_index in range(last_possible_prefix_index):
+        prefix_part = word[:prefix_end_index]
+        word_part = word[prefix_end_index:]
+        yield word_part
+        if word[prefix_end_index] not in prefixes:
+            break
+    return None
+
+
+def search_sub_acronym(word, acronyms_container=None):
+    for word_part in identify_possible_word_parts(word, '"'):
+        if acronyms_container is not None:
+            acronym = search_acronym_container(word_part, acronyms_container)
+            if acronym:
+                return acronym
+    return None
+
 def search_sub_acronym(word, acronyms_container=None):
     prefixes = ['מ','ש','ה','ו','כ','ל','ב']
     last_possible_prefix_index = word.find('"')
