@@ -2,11 +2,16 @@ import pandas as pd
 import regex
 
 STANZA_SUPPORT = False
+TRIE_SUPPORT = True
+
 if STANZA_SUPPORT:
     import stanza
     # stanza.download('he')    # should be done only once! TODO: add special handing for offline
     nlp = stanza.Pipeline(lang='he', processors='tokenize', tokenize_pretokenized=False, tokenize_no_ssplit=True,
                           download_method=None)
+
+if TRIE_SUPPORT:
+    from trie import Trie
 
 def split_sentence_simple(sentence):
     return sentence.split(' ')
@@ -61,33 +66,58 @@ def detokenize_sentence(splitted, mode='punc'):
     else:
         return None
 
-def get_acronym_dict(filename):
+
+TRIE_SUPPORT = False
+
+
+def create_acronym_container(acronyms):
+    if TRIE_SUPPORT:
+        trie = Trie()
+        trie.insert_batch(acronyms)
+        return trie
+    else:
+        acronyms_sorted_by_length = sorted(acronyms, key=lambda x: -len(x))
+        return acronyms_sorted_by_length
+
+
+def get_acronym_datastructures(filename):
     s = pd.read_csv(filename, index_col=0)
     d_meaning = {key: val for (key, val) in s.meaning.items() if len(key) >= 3}
-    acronyms_sorted_by_length = sorted(d_meaning.keys(), key=lambda x: -len(x))
-    return d_meaning, acronyms_sorted_by_length
+    acronyms_container = create_acronym_container(d_meaning.keys())
+    # acronyms_sorted_by_length = sorted(d_meaning.keys(), key=lambda x: -len(x))
+    return d_meaning, acronyms_container
 
-def search_sub_acronym(word, acronyms_sorted=None):
-    prefixes = ['מ', 'ש', 'ה', 'ו', 'כ', 'ל', 'ב']
+
+def search_acronym_container(word, acronyms_container):
+    if TRIE_SUPPORT:
+        return acronyms_container.search_prefix(word)
+    else:
+        for acronym in acronyms_container:
+            if word.startswith(acronym):
+                # print('***', acronym)
+                return acronym
+        return None
+
+
+def search_sub_acronym(word, acronyms_container=None):
+    prefixes = ['מ','ש','ה','ו','כ','ל','ב']
     last_possible_prefix_index = word.find('"')
     for prefix_end_index in range(last_possible_prefix_index):
         prefix_part = word[:prefix_end_index]
         word_part = word[prefix_end_index:]
-        if acronyms_sorted is not None:
-            for acronym in acronyms_sorted:
-                if word_part.startswith(acronym):
-                    # print('***', acronym)
-                    return acronym
+        if acronyms_container is not None:
+            acronym = search_acronym_container(word_part, acronyms_container)
+            if acronym:
+                return acronym
         if word[prefix_end_index] not in prefixes:
             break
     return None
 
 
 def add_acronym_meaning(sentence, d_meaning, acronyms_sorted):
-    # is_modified = False
     modified_acronyms = set()
-    splitted = split_sentence(sentence, mode='regex')
 
+    splitted = split_sentence(sentence, mode='regex')
     for i in range(len(splitted)):
         word = splitted[i]
 
@@ -97,18 +127,17 @@ def add_acronym_meaning(sentence, d_meaning, acronyms_sorted):
             if acronym:
                 modified_acronyms.add(acronym)
                 splitted[i] = f'{word} ({d_meaning[acronym]})'
-            else:
-                print(f'{word} not found in dict')
+            # else:
+            #     print(f'{word} not found in dict')
 
     new_sentence = detokenize_sentence(splitted)
     return new_sentence, modified_acronyms
-
 def test(d_meaning, acronyms_sorted):
     sentence = 'בא"מ מתכננים לעשות את זה'
     print(add_acronym_meaning(sentence, d_meaning, acronyms_sorted))
 
 if __name__=='__main__':
-    d_meaning, acronyms_sorted = get_acronym_dict(
+    d_meaning, acronyms_container = get_acronym_datastructures(
         'C:\\Users\\MICHALD2\\projects\\Translator\\wikipedia_util\\acronyms\\data\\output_acronyms_from_wiktionary.csv')
     # test(d_meaning, acronyms_sorted)
 
@@ -120,7 +149,7 @@ if __name__=='__main__':
     modified = set()
     for i, row in df_inss.iterrows():
         sentence = row['HE_sentences']
-        new_sentence, is_modified = add_acronym_meaning(sentence, d_meaning, acronyms_sorted)
+        new_sentence, is_modified = add_acronym_meaning(sentence, d_meaning, acronyms_container)
         # if is_modified:
         if len(is_modified) > 0:
             if len(is_modified.intersection(modified)) == 0:
@@ -129,4 +158,4 @@ if __name__=='__main__':
                 print(sentence)
                 print(new_sentence)
             modified.update(is_modified)
-        if counter == 5: break 	
+        if counter == 5: break
