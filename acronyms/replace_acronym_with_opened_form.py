@@ -1,16 +1,25 @@
 import pandas as pd
-import stanza, regex
-# stanza.download('he')    # should be done only once! TODO: add special handing for offline
+import regex
 
-nlp = stanza.Pipeline(lang='he', processors='tokenize', tokenize_pretokenized=False, tokenize_no_ssplit=True,
-                      download_method=None)
-
+STANZA_SUPPORT = False
+if STANZA_SUPPORT:
+    import stanza
+    # stanza.download('he')    # should be done only once! TODO: add special handing for offline
+    nlp = stanza.Pipeline(lang='he', processors='tokenize', tokenize_pretokenized=False, tokenize_no_ssplit=True,
+                          download_method=None)
 
 def split_sentence_simple(sentence):
     return sentence.split(' ')
 
+def split_sentence_regex(sentence):
+    pattern = '[\p{Hebrew}\"\d]+|[^\s\"]'
+    tokens = regex.findall(pattern, sentence)
+    return tokens
 
 def split_sentence_stanza(sentence):
+    if not STANZA_SUPPORT:
+        print("stanza is not supported")
+        return None
     doc = nlp(sentence)
 
     splitted = []
@@ -18,11 +27,20 @@ def split_sentence_stanza(sentence):
         splitted.extend([token.text for token in s.tokens])
     return splitted
 
+def split_sentence(sentence, mode='regex'):
+    if mode == 'simple':
+        return split_sentence_simple(sentence)
+    elif mode == 'stanza':
+        return split_sentence_stanza(sentence)
+    elif mode=='regex':
+        return split_sentence_regex(sentence)
+    else:
+        return None
 
 def detokenize_sentence_punc(splitted):
     res = ''
-    punc_attached_prev_chars = '.,;:?!\')]}"'
-    punc_attached_next_chars = '([{"'
+    punc_attached_prev_chars = '.,;:?!\')]}'
+    punc_attached_next_chars = '([{'
     for i in range(len(splitted)):
         if splitted[i][0] in splitted[i][0] in punc_attached_prev_chars:
             res += splitted[i]
@@ -32,10 +50,8 @@ def detokenize_sentence_punc(splitted):
             res = res + ' ' + splitted[i]
     return res
 
-
 def detokenize_sentence_simple(splitted):
     return ' '.join(splitted)
-
 
 def detokenize_sentence(splitted, mode='punc'):
     if mode == 'simple':
@@ -45,21 +61,11 @@ def detokenize_sentence(splitted, mode='punc'):
     else:
         return None
 
-def split_sentence(sentence, mode='simple'):
-    if mode == 'simple':
-        return split_sentence_simple(sentence)
-    elif mode == 'stanza':
-        return split_sentence_stanza(sentence)
-    else:
-        return None
-
-
 def get_acronym_dict(filename):
     s = pd.read_csv(filename, index_col=0)
     d_meaning = {key: val for (key, val) in s.meaning.items() if len(key) >= 3}
     acronyms_sorted_by_length = sorted(d_meaning.keys(), key=lambda x: -len(x))
     return d_meaning, acronyms_sorted_by_length
-
 
 def search_sub_acronym(word, acronyms_sorted=None):
     prefixes = ['מ', 'ש', 'ה', 'ו', 'כ', 'ל', 'ב']
@@ -80,8 +86,8 @@ def search_sub_acronym(word, acronyms_sorted=None):
 def add_acronym_meaning(sentence, d_meaning, acronyms_sorted):
     # is_modified = False
     modified_acronyms = set()
+    splitted = split_sentence(sentence, mode='regex')
 
-    splitted = split_sentence(sentence, mode='stanza')
     for i in range(len(splitted)):
         word = splitted[i]
 
@@ -123,4 +129,4 @@ if __name__=='__main__':
                 print(sentence)
                 print(new_sentence)
             modified.update(is_modified)
-        # if counter == 5: break
+        if counter == 5: break 	
