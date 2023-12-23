@@ -1,74 +1,12 @@
 import pandas as pd
 import regex
-
-STANZA_SUPPORT = False
-TRIE_SUPPORT = True
-
-if STANZA_SUPPORT:
-    import stanza
-    # stanza.download('he')    # should be done only once! TODO: add special handing for offline
-    nlp = stanza.Pipeline(lang='he', processors='tokenize', tokenize_pretokenized=False, tokenize_no_ssplit=True,
-                          download_method=None)
-
-if TRIE_SUPPORT:
-    from trie import Trie
-
-def split_sentence_simple(sentence):
-    return sentence.split(' ')
-
-def split_sentence_regex(sentence):
-    pattern = '[\p{Hebrew}\"\d]+|[^\s\"]'
-    tokens = regex.findall(pattern, sentence)
-    return tokens
-
-def split_sentence_stanza(sentence):
-    if not STANZA_SUPPORT:
-        print("stanza is not supported")
-        return None
-    doc = nlp(sentence)
-
-    splitted = []
-    for s in doc.sentences:
-        splitted.extend([token.text for token in s.tokens])
-    return splitted
-
-def split_sentence(sentence, mode='regex'):
-    if mode == 'simple':
-        return split_sentence_simple(sentence)
-    elif mode == 'stanza':
-        return split_sentence_stanza(sentence)
-    elif mode=='regex':
-        return split_sentence_regex(sentence)
-    else:
-        return None
-
-def detokenize_sentence_punc(splitted):
-    res = ''
-    punc_attached_prev_chars = '.,;:?!\')]}'
-    punc_attached_next_chars = '([{'
-    for i in range(len(splitted)):
-        if splitted[i][0] in splitted[i][0] in punc_attached_prev_chars:
-            res += splitted[i]
-        elif i > 0 and splitted[i - 1][-1] in punc_attached_next_chars:
-            res += splitted[i]
-        else:
-            res = res + ' ' + splitted[i]
-    return res
-
-def detokenize_sentence_simple(splitted):
-    return ' '.join(splitted)
-
-def detokenize_sentence(splitted, mode='punc'):
-    if mode == 'simple':
-        return detokenize_sentence_simple(splitted)
-    elif mode == 'punc':
-        return detokenize_sentence_punc(splitted)
-    else:
-        return None
+from acronyms_utils import *
+from sentence_splitter import split_sentence, detokenize_sentence
 
 
 TRIE_SUPPORT = False
-
+if TRIE_SUPPORT:
+    from trie import Trie
 
 def create_acronym_container(acronyms):
     if TRIE_SUPPORT:
@@ -99,20 +37,6 @@ def search_acronym_container(word, acronyms_container):
         return None
 
 
-def identify_possible_word_parts(word, last_index_indicator = None):
-    prefixes = ['מ','ש','ה','ו','כ','ל','ב']
-    if last_index_indicator is not None:
-        last_possible_prefix_index = word.find(last_index_indicator)
-    else:
-        last_possible_prefix_index = len(word)
-    for prefix_end_index in range(last_possible_prefix_index):
-        prefix_part = word[:prefix_end_index]
-        word_part = word[prefix_end_index:]
-        yield word_part
-        if word[prefix_end_index] not in prefixes:
-            break
-    return None
-
 
 def search_sub_acronym(word, acronyms_container=None):
     for word_part in identify_possible_word_parts(word, '"'):
@@ -120,20 +44,6 @@ def search_sub_acronym(word, acronyms_container=None):
             acronym = search_acronym_container(word_part, acronyms_container)
             if acronym:
                 return acronym
-    return None
-
-def search_sub_acronym(word, acronyms_container=None):
-    prefixes = ['מ','ש','ה','ו','כ','ל','ב']
-    last_possible_prefix_index = word.find('"')
-    for prefix_end_index in range(last_possible_prefix_index):
-        prefix_part = word[:prefix_end_index]
-        word_part = word[prefix_end_index:]
-        if acronyms_container is not None:
-            acronym = search_acronym_container(word_part, acronyms_container)
-            if acronym:
-                return acronym
-        if word[prefix_end_index] not in prefixes:
-            break
     return None
 
 
@@ -144,7 +54,7 @@ def add_acronym_meaning(sentence, d_meaning, acronyms_sorted):
     for i in range(len(splitted)):
         word = splitted[i]
 
-        pattern = '\p{Hebrew}+\"\p{Hebrew}+'
+        pattern = ACRONYM_REGEX_PATTERN #'\p{Hebrew}+\"\p{Hebrew}+'
         if regex.match(pattern, word) is not None:
             acronym = search_sub_acronym(word, acronyms_sorted)
             if acronym:
@@ -181,4 +91,4 @@ if __name__=='__main__':
                 print(sentence)
                 print(new_sentence)
             modified.update(is_modified)
-        if counter == 5: break
+        if counter == 10: break
