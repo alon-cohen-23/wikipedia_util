@@ -1,8 +1,8 @@
 import pandas as pd
 import regex
 from acronyms_utils import *
-from sentence_splitter import split_sentence, detokenize_sentence
-
+# from sentence_splitter import split_sentence, detokenize_sentence, SPLIT_MODE
+from sentence_splitter import sentenceSplitterDicta, sentenceDefaultSplitter
 
 TRIE_SUPPORT = False
 if TRIE_SUPPORT:
@@ -36,10 +36,9 @@ def search_acronym_container(word, acronyms_container):
                 return acronym
         return None
 
-
-
-def search_sub_acronym(word, acronyms_container=None):
-    for word_part in identify_possible_word_parts(word, '"'):
+def search_sub_acronym(word, sentence_splitter, acronyms_container=None, check_for_prefixes=False):
+    possible_word_parts = sentence_splitter.identify_possible_word_parts(word, '"', check_for_prefixes)
+    for word_part in possible_word_parts:
         if acronyms_container is not None:
             acronym = search_acronym_container(word_part, acronyms_container)
             if acronym:
@@ -47,27 +46,37 @@ def search_sub_acronym(word, acronyms_container=None):
     return None
 
 
-def add_acronym_meaning(sentence, d_meaning, acronyms_sorted):
+def add_acronym_meaning(sentence, d_meaning, acronyms_container, sentence_splitter):
+    if is_acronym(sentence, search_type='search') is None:
+        return sentence, []
+
+    # check_for_prefixes = SPLIT_MODE!='dicta'
+    check_for_prefixes = not isinstance(sentence_splitter, sentenceSplitterDicta)
+
     modified_acronyms = set()
-
-    splitted = split_sentence(sentence, mode='regex')
+    splitted = sentence_splitter.split_sentence(sentence)
     for i in range(len(splitted)):
-        word = splitted[i]
+        base_word = sentence_splitter.get_base_word(splitted[i])
+        # if SPLIT_MODE=='dicta': # was splitted with dicta
+        #     word = splitted[i][-1]
+        # else:
+        #     word = splitted[i]
 
-        pattern = ACRONYM_REGEX_PATTERN #'\p{Hebrew}+\"\p{Hebrew}+'
-        if regex.match(pattern, word) is not None:
-            acronym = search_sub_acronym(word, acronyms_sorted)
+        if is_acronym(base_word, search_type='match') is not None:
+            acronym = search_sub_acronym(splitted[i], sentence_splitter, acronyms_container, check_for_prefixes)
             if acronym:
                 modified_acronyms.add(acronym)
-                splitted[i] = f'{word} ({d_meaning[acronym]})'
+                new_word =f'{splitted[i][-1]} ({d_meaning[acronym]})'
+                # if SPLIT_MODE=='dicta':  # was splitted with dicta
+                if isinstance(sentence_splitter, sentenceSplitterDicta):
+                    splitted[i][-1] = new_word
+                else:
+                    splitted[i] = new_word
             # else:
             #     print(f'{word} not found in dict')
 
-    new_sentence = detokenize_sentence(splitted)
+    new_sentence = sentence_splitter.detokenize_sentence(splitted)
     return new_sentence, modified_acronyms
-def test(d_meaning, acronyms_sorted):
-    sentence = 'בא"מ מתכננים לעשות את זה'
-    print(add_acronym_meaning(sentence, d_meaning, acronyms_sorted))
 
 if __name__=='__main__':
     d_meaning, acronyms_container = get_acronym_datastructures(
@@ -78,17 +87,18 @@ if __name__=='__main__':
     df_inss = pd.read_parquet(par_file, engine='pyarrow')
     # df_inss.head()
 
+    sentence_splitter =  sentenceSplitterDicta() #sentenceDefaultSplitter()
     counter = 0
-    modified = set()
+    modified_all = set()
     for i, row in df_inss.iterrows():
         sentence = row['HE_sentences']
-        new_sentence, is_modified = add_acronym_meaning(sentence, d_meaning, acronyms_container)
+        new_sentence, modified = add_acronym_meaning(sentence, d_meaning, acronyms_container, sentence_splitter)
         # if is_modified:
-        if len(is_modified) > 0:
-            if len(is_modified.intersection(modified)) == 0:
+        if len(modified) > 0:
+            if len(modified.intersection(modified_all)) == 0:
                 counter += 1
                 print('------')
                 print(sentence)
                 print(new_sentence)
-            modified.update(is_modified)
+            modified_all.update(modified)
         if counter == 10: break
