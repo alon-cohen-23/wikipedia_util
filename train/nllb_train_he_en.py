@@ -34,7 +34,7 @@ DO_PREDICT = True
 
 wandb.login()
 # start a new wandb run to track this script
-wandb.init(project="NLLB-training-project", name = "run_1_4M_nllb_he_en")
+wandb.init(project="NLLB-training-project", name = "run_nllb_600M_he_en_80K_relevant_pages")
 
 data_path = Path('./data')
 
@@ -106,7 +106,7 @@ def get_output_model_name(model_checkpoint,src_lang,tgt_lang):
 
 
 # Language codes: https://github.com/facebookresearch/flores/blob/main/flores200/README.md#languages-in-flores-200
-model_checkpoint = "facebook/nllb-200-distilled-1.3B" # 'output_models/nllb-200-distilled-1.3B_heb_eng_wiki_40000/checkpoint-80448/' # "facebook/nllb-200-distilled-1.3B" # "facebook/m2m100_418M" # "facebook/nllb-200-distilled-600M"
+model_checkpoint = "facebook/nllb-200-distilled-600M" # 'output_models/nllb-200-distilled-1.3B_heb_eng_wiki_40000/checkpoint-80448/' # "facebook/nllb-200-distilled-1.3B" # "facebook/m2m100_418M" # "facebook/nllb-200-distilled-600M"
     
 src_lang = "heb_Hebr"
 tgt_lang="eng_Latn"
