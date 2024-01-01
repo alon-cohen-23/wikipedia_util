@@ -34,14 +34,14 @@ DO_PREDICT = True
 
 wandb.login()
 # start a new wandb run to track this script
-wandb.init(project="NLLB-training-project", name = "run_nllb_600M_he_en_80K_relevant_pages")
+wandb.init(project="NLLB-training-project", name = "nllb_600M_ar_en")
 
 data_path = Path('./data')
 
   
 def create_dataset_train_val(df_path, random_state=42, test_size=25000, 
                              max_input_length=200, max_target_length=200, train_size=-1, 
-                             dataset_name = 'wikipedia_he_en_relevant_cats'):  
+                             dataset_name = 'wikipedia_ar_en'):  
     df = pd.read_parquet(df_path)  
     if 'Unnamed: 0' in df.columns:  
         df = df.drop(columns=['Unnamed: 0'])  
@@ -105,10 +105,11 @@ def get_output_model_name(model_checkpoint,src_lang,tgt_lang):
     return output_name
 
 
-# Language codes: https://github.com/facebookresearch/flores/blob/main/flores200/README.md#languages-in-flores-200
+
 model_checkpoint = "facebook/nllb-200-distilled-600M" # 'output_models/nllb-200-distilled-1.3B_heb_eng_wiki_40000/checkpoint-80448/' # "facebook/nllb-200-distilled-1.3B" # "facebook/m2m100_418M" # "facebook/nllb-200-distilled-600M"
-    
-src_lang = "heb_Hebr"
+
+# Language codes: https://github.com/facebookresearch/flores/blob/main/flores200/README.md#languages-in-flores-200    
+src_lang = "arb_Arab" # "heb_Hebr" 
 tgt_lang="eng_Latn"
 
 
@@ -125,7 +126,7 @@ output_name = get_output_model_name(model_checkpoint,src_lang,tgt_lang)
 
 
 # Load wikipeida dataset
-split_datasets = create_dataset_train_val(df_path='./data/translated_df_relevant_cats.parquet', 
+split_datasets = create_dataset_train_val(df_path='./data/ar_sentences.parquet', 
                                           max_input_length=max_input_length, 
                                           max_target_length=max_target_length,
                                           train_size=-1) # DO_PRED --> train_size=100 to avoid long tokenization
