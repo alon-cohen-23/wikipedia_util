@@ -1,4 +1,6 @@
 import pandas as pd
+from sentence_splitter import sentenceSplitterDicta
+
 
 def remove_wrong_acronym(df):
     def is_wrong_acronym(x):
@@ -9,16 +11,13 @@ def remove_wrong_acronym(df):
     return df
 
 def identify_base(df_orig):
-    df = df_orig.copy().reset_index()
-    df['base'] = df.acronym
-    df.sort_values(by='base', ascending=False, key=lambda col: col.str.len(), inplace=True)
-    for i in range(len(df.base) - 1):
-        for j in range(i + 1, len(df.base)):
-            if len(df.base[j]) <= 3: break
-            if df.base[j] in df.base[i]:
-                # print(f"{i}, {j}, Old base: {df.base[i]}, New base: {df.base[j]}")
-                df.loc[i, 'base'] = df.base[j]
-    # print(df[df.base!=df.acronym])
+    df = df_orig.copy()
+    df.sort_values(by='base_acronym', ascending=False, key=lambda col: col.str.len(), inplace=True)
+    for i in range(len(df.base_acronym) - 1):
+        for j in range(i + 1, len(df.base_acronym)):
+            if len(df.base_acronym[j]) <= 3: break
+            if df.base_acronym[i].startswith(df.base_acronym[j]):
+                df.loc[i, 'base_acronym'] = df.base_acronym[j]
     return df
 
 def group_by_base(df):
@@ -28,13 +27,23 @@ def group_by_base(df):
         else:
             return sum(s)
 
-    df_count_base = df.groupby('base').agg(acronyms_data_agg)
+    df_count_base = df.groupby('base_acronym').agg(acronyms_data_agg)
+    df_count_base['n_united'] = df_count_base.acronym.apply(len)
     return df_count_base
 
-if __name__=='__main__':
-    df_counts = pd.read_csv('data//acronyms_in_resources_small.csv', index_col = 'acronym')
-    df_counts = remove_wrong_acronym(df_counts)
-
+def create_acronym_list(acronym_src, output_file):
+    if type(acronym_src)==str: # filename
+        df_counts = pd.read_csv(acronym_src, encoding='utf-8', index_col = 'acronym')
+    else: # df
+        df_counts = acronym_src.copy()
+    sentence_splitter = sentenceSplitterDicta()
+    df_counts = remove_wrong_acronym(df_counts).reset_index()
+    df_counts['base_acronym'] = df_counts.acronym.apply(lambda token:
+                                                        sentence_splitter.get_base_word(sentence_splitter.split_sentence(token)[0]))
     df_counts = identify_base(df_counts)
-
     df_count_base = group_by_base(df_counts)
+    df_count_base.to_csv(output_file, encoding='utf-8')
+
+if __name__=='__main__':
+    create_acronym_list(acronym_src='data//acronyms_in_resources_small.csv',
+                        output_file='data//outputs//acronyms_list_sample.csv')

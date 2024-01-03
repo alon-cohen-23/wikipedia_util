@@ -22,9 +22,7 @@ def get_acronym_datastructures(filename):
     s = pd.read_csv(filename, index_col=0)
     d_meaning = {key: val for (key, val) in s.meaning.items() if len(key) >= 3}
     acronyms_container = create_acronym_container(d_meaning.keys())
-    # acronyms_sorted_by_length = sorted(d_meaning.keys(), key=lambda x: -len(x))
     return d_meaning, acronyms_container
-
 
 def search_acronym_container(word, acronyms_container):
     if TRIE_SUPPORT:
@@ -32,7 +30,6 @@ def search_acronym_container(word, acronyms_container):
     else:
         for acronym in acronyms_container:
             if word.startswith(acronym):
-                # print('***', acronym)
                 return acronym
         return None
 

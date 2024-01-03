@@ -1,5 +1,9 @@
 from itertools import product
-import regex
+from collections import defaultdict, Counter
+from tqdm import tqdm
+import pandas as pd
+import pickle
+
 from acronyms_utils import *
 from sentence_splitter import sentenceSplitterDicta #split_sentence, detokenize_sentence, SPLIT_MODE
 
@@ -25,14 +29,10 @@ def get_n_grams_after(tokens, n, sentence_splitter):
 def get_n_grams_before(tokens, n, sentence_splitter):
     reversed_tokens = tokens[::-1]
     reversed_words = get_first_n_grams(reversed_tokens, n, sentence_splitter)
-    res = reversed_words[::-1]
-    # print(f'before: {res}')
+    res = reversed_words[::-1] if reversed_words else None
     return res
 
 def is_possible_opened_form(acronym_splitted, words):
-    # words = [sentence_splitter.get_base_word(t) for w in tokens]
-    # if SPLIT_MODE=='dicta':
-    #     words = [w[-1] for w in words]
     return all([words[i].startswith(acronym_splitted[i]) for i in range(len(acronym_splitted))])
 
 def create_partitions(l, k=2):
@@ -48,12 +48,6 @@ def create_partitions(l, k=2):
     return full_res
 
 def find_opened_for_this_acronym(tokens, i, sentence_splitter):
-    # if SPLIT_MODE=='dicta':
-    #     acronym = tokens[i][-1]
-    #     check_for_prefixes = False
-    # else:
-    #     acronym = tokens[i]
-    #     check_for_prefixes = True
     acronym = tokens[i]
     acronym_with_possible_prefixes = identify_possible_word_parts(acronym, sentence_splitter,
                                                                   last_index_indicator='"',
@@ -86,14 +80,10 @@ def find_opened_for_this_acronym(tokens, i, sentence_splitter):
 
 
 def create_local_acronym_info(document, sentence_splitter):
-    tokens = sentence_splitter.split_sentence(document)
     res = []
+    tokens = sentence_splitter.split_sentence(document)
     for i in range(len(tokens)):
         word = sentence_splitter.get_base_word(tokens[i])
-        # if SPLIT_MODE=='dicta':
-        #     word = tokens[i][-1]
-        # else:
-        #     word = tokens[i]
         if is_acronym(word, search_type='match'):
             # TODO: add support for acronyms with prefixes and suffixes
             acronym, words_parts_combination = find_opened_for_this_acronym(tokens, i, sentence_splitter)
@@ -106,6 +96,24 @@ if __name__=='__main__':
     document = 'האסטרטגיה הישראלית בזירה זו בשנים האחרונות זכתה לכותרת "המערכה שבין המלחמות" (מב"מ).'
     # document = 'הרמטכ"ל (ראש המטה הכללי) הורה לעשות את זה'
     # document = 'צבא ההגנה לישראל (צה"ל) ינצח'
+    res_file = 'local_acronyms.pickle'
+    d_res = {}
     sentence_splitter = sentenceSplitterDicta()
-    res = create_local_acronym_info(document, sentence_splitter)
-    print(res)
+    sources = [('''C:\\Users\\MICHALD2\\projects\\Translator\\Michal\\sentences\\inss_all_pages.parquet''', 'inss'),
+               ('''C:\\Users\\MICHALD2\\projects\\Translator\\Michal\\sentences\\translated_df_relevant_cats.parquet''', 'wiki')]
+    for filename, src in sources:
+        df = pd.read_parquet(filename)
+        for document in tqdm(df.HE_sentences.values):
+            res = create_local_acronym_info(document, sentence_splitter)
+            if res:
+                for (acronym, opened_form) in res:
+                    print(f'Found: {acronym}, {opened_form}, {src}')
+                    if acronym not in d_res:
+                        d_res[acronym] = {}
+                    if opened_form not in d_res[acronym]:
+                        d_res[acronym][opened_form] = Counter()
+                    d_res[acronym][opened_form][src] +=1
+        break
+    pickle.dump(d_res, open(res_file, 'wb'))
+        # # res = create_local_acronym_info(document, sentence_splitter)
+        # # print(res)

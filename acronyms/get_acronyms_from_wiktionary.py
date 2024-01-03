@@ -86,5 +86,5 @@ if __name__=='__main__':
     start_url = 'https://he.wiktionary.org/wiki/%D7%A7%D7%98%D7%92%D7%95%D7%A8%D7%99%D7%94:%D7%A8%D7%90%D7%A9%D7%99_%D7%AA%D7%99%D7%91%D7%95%D7%AA_%D7%91%D7%A6%D7%94%22%D7%9C'
     d_acronyms = retrieve_acronyms_meaning_from_wiki(base_url, start_url)
     df = pd.DataFrame.from_dict(d_acronyms, 'index', columns=['meaning'])
-    output_file = 'data\\output_acronyms_from_wiktionary.csv'
+    output_file = 'data\\outputs\\output_acronyms_from_wiktionary.csv'
     df.to_csv(output_file)
