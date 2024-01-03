@@ -25,7 +25,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
 import torch
 from transformers import NllbTokenizer, AutoModelForSeq2SeqLM, DataCollatorForSeq2Seq, Seq2SeqTrainingArguments, Seq2SeqTrainer
-from datasets import load_dataset, load_metric, Dataset, DatasetDict, load_from_disk
+from datasets import load_dataset, Dataset, DatasetDict, load_from_disk
+import evaluate
 import wandb
 
 DO_TRAIN = True
@@ -126,7 +127,7 @@ output_name = get_output_model_name(model_checkpoint,src_lang,tgt_lang)
 
 
 # Load wikipeida dataset
-split_datasets = create_dataset_train_val(df_path='./data/ar_sentences.parquet', 
+split_datasets = create_dataset_train_val(df_path='./data/ar_en_translated_custom_df.parquet', 
                                           max_input_length=max_input_length, 
                                           max_target_length=max_target_length,
                                           train_size=-1) # DO_PRED --> train_size=100 to avoid long tokenization
@@ -137,7 +138,7 @@ split_datasets = create_dataset_train_val(df_path='./data/ar_sentences.parquet',
 for key in split_datasets.keys():
   print (key)
 
-metric = load_metric("sacrebleu")
+metric = evaluate.load("sacrebleu")
 #bleu_metric = load_metric("bleu")
 
 
