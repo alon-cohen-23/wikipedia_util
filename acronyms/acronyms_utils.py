@@ -1,6 +1,5 @@
 import regex
 from regex_patterns import *
-from sentence_splitter import sentenceSplitterDicta
 
 def is_acronym(word, search_type):
     pattern = ACRONYM_REGEX_PATTERN
@@ -34,22 +33,22 @@ def search_sub_acronym(word, acronyms_container=None):
         if word[prefix_end_index] not in prefixes:
             break
     return None
-
-def identify_possible_word_parts(word, sentence_splitter, last_index_indicator = None, check_for_prefixes=False):
-    if not check_for_prefixes:
-        yield sentence_splitter.get_base_word(word)
-        return
-    else:
-        whole_word = sentence_splitter.get_whole_word(word)
-    prefixes = ['מ','ש','ה','ו','כ','ל','ב']
-    if last_index_indicator is not None:
-        last_possible_prefix_index = whole_word.find(last_index_indicator)
-    else:
-        last_possible_prefix_index = len(whole_word)
-    for prefix_end_index in range(last_possible_prefix_index):
-        prefix_part = whole_word[:prefix_end_index]
-        word_part = whole_word[prefix_end_index:]
-        yield word_part
-        if whole_word[prefix_end_index] not in prefixes:
-            break
-    return None
+#
+# def identify_possible_word_parts(word, sentence_splitter, last_index_indicator = None, check_for_prefixes=False):
+#     if not check_for_prefixes:
+#         yield sentence_splitter.get_base_word(word)
+#         return
+#     else:
+#         whole_word = sentence_splitter.get_whole_word(word)
+#     prefixes = ['מ','ש','ה','ו','כ','ל','ב']
+#     if last_index_indicator is not None:
+#         last_possible_prefix_index = whole_word.find(last_index_indicator)
+#     else:
+#         last_possible_prefix_index = len(whole_word)
+#     for prefix_end_index in range(last_possible_prefix_index):
+#         prefix_part = whole_word[:prefix_end_index]
+#         word_part = whole_word[prefix_end_index:]
+#         yield word_part
+#         if whole_word[prefix_end_index] not in prefixes:
+#             break
+#     return None
