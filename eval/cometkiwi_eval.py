@@ -103,5 +103,5 @@ def main(model_name_or_path, max_samples = 4000):
     return df_samp
     
 if __name__ == "__main__":    
-    df_samp = main(model_name_or_path = './nllb-200-distilled-600M_arb_eng/checkpoint-84298/') # 'output_models/nllb-200-distilled-600M_heb_eng/checkpoint-172058/'
+    df_samp = main(model_name_or_path = './nllb-200-distilled-600M_arb_eng/checkpoint-141286/') # 'output_models/nllb-200-distilled-600M_heb_eng/checkpoint-172058/'
                    
