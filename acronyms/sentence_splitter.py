@@ -128,7 +128,7 @@ if __name__=='__main__':
     sentence_splitter = sentenceSplitterDicta()
     splitted = sentence_splitter.split_sentence(sentence)
     print(splitted)
-    new_sentence = sentence_splitter.detokenize_sentence(splitted)
+    new_sentence = sentence_splitter.detokenize_sentence(splitted).strip()
     print(new_sentence)
     print(sentence==new_sentence)
 

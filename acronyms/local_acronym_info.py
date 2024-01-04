@@ -81,6 +81,7 @@ def find_opened_for_this_acronym(tokens, i, sentence_splitter):
 
 def create_local_acronym_info(document, sentence_splitter):
     res = []
+    if document is None or '"' not in document: return res
     tokens = sentence_splitter.split_sentence(document)
     for i in range(len(tokens)):
         word = sentence_splitter.get_base_word(tokens[i])
@@ -91,21 +92,15 @@ def create_local_acronym_info(document, sentence_splitter):
                 res.append((acronym, sentence_splitter.detokenize_sentence(words_parts_combination)))
     return res
 
-
-if __name__=='__main__':
-    document = 'האסטרטגיה הישראלית בזירה זו בשנים האחרונות זכתה לכותרת "המערכה שבין המלחמות" (מב"מ).'
-    # document = 'הרמטכ"ל (ראש המטה הכללי) הורה לעשות את זה'
-    # document = 'צבא ההגנה לישראל (צה"ל) ינצח'
-    res_file = 'local_acronyms.pickle'
+def collect_opened_form(sources, res_filename):
     d_res = {}
     sentence_splitter = sentenceSplitterDicta()
-    sources = [('''C:\\Users\\MICHALD2\\projects\\Translator\\Michal\\sentences\\inss_all_pages.parquet''', 'inss'),
-               ('''C:\\Users\\MICHALD2\\projects\\Translator\\Michal\\sentences\\translated_df_relevant_cats.parquet''', 'wiki')]
+    i = 0
     for filename, src in sources:
         df = pd.read_parquet(filename)
         for document in tqdm(df.HE_sentences.values):
             res = create_local_acronym_info(document, sentence_splitter)
-            if res:
+            if res!=[]:
                 for (acronym, opened_form) in res:
                     print(f'Found: {acronym}, {opened_form}, {src}')
                     if acronym not in d_res:
@@ -113,7 +108,33 @@ if __name__=='__main__':
                     if opened_form not in d_res[acronym]:
                         d_res[acronym][opened_form] = Counter()
                     d_res[acronym][opened_form][src] +=1
-        break
-    pickle.dump(d_res, open(res_file, 'wb'))
-        # # res = create_local_acronym_info(document, sentence_splitter)
-        # # print(res)
+        i+=1
+        if i%1000==0:
+            print(i)
+            pickle.dump(d_res, open(res_file, 'wb'))
+
+def results2df(res_filename, df_file):
+    d_res = pickle.load(open(res_filename, 'rb'))
+    l_res = []
+    # print(d_res['א"א'])
+    # d_res['א"א'][' איחוד אירופי']['TEMP'] = 1000
+    for acronym in d_res:
+        for opened_form in d_res[acronym]:
+            for src in d_res[acronym][opened_form]:
+                count = d_res[acronym][opened_form][src]
+                l_res.append((acronym, opened_form, src, count))
+    df = pd.DataFrame(l_res, columns = ['acronym', 'opened_form', 'src', 'count']) #.set_index('acronym')
+    df1 = df.pivot(index=['acronym', 'opened_form'], columns='src', values='count').reset_index()
+    df1.to_csv(df_file)
+
+if __name__=='__main__':
+    # document = 'האסטרטגיה הישראלית בזירה זו בשנים האחרונות זכתה לכותרת "המערכה שבין המלחמות" (מב"מ).'
+    # # document = 'הרמטכ"ל (ראש המטה הכללי) הורה לעשות את זה'
+    # # document = 'צבא ההגנה לישראל (צה"ל) ינצח'
+    res_filename = 'data\\outputs\\local_acronyms.pickle'
+    sources = [('''C:\\Users\\MICHALD2\\projects\\Translator\\Michal\\sentences\\inss_all_pages.parquet''', 'inss'),
+               ('''C:\\Users\\MICHALD2\\projects\\Translator\\Michal\\sentences\\translated_df_relevant_cats.parquet''', 'wiki')]
+    df_file = 'data\\outputs\\df_local_dict.csv'
+    # collect_opened_form(sources, res_filename)
+    print('finished collecting opened form')
+    results2df(res_filename, df_file)
