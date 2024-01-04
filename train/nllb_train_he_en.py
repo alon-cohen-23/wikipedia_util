@@ -39,11 +39,52 @@ wandb.init(project="NLLB-training-project", name = "nllb_600M_ar_en")
 
 data_path = Path('./data')
 
-  
-def create_dataset_train_val(df_path, random_state=42, test_size=25000, 
+
+import os 
+from pathlib import Path
+import pandas as pd
+import glob
+
+
+def read_df_folder(root_path, glob_pattern = "*.parquet", recursive=False, ignore_index=True, read_func=pd.read_parquet, **kwargs):
+    """
+    Reads a folder of .csv or .parquet --> concat to result df
+
+    Parameters
+    ----------
+    root_path : TYPE
+        DESCRIPTION.
+    glob_pattern : TYPE, optional -  which files to read
+        DESCRIPTION. The default is "*.parquet".
+    recursive : True for recursive search - default=False    
+    ignore_index : TYPE, optional
+        DESCRIPTION. The default is True.
+    read_func : pd.read_csv, pd.read_xxx 
+        DESCRIPTION. The default is pd.read_parquet.
+    **kwargs : args for read_xxx funcs (sep='\t', header=True ...)
+        DESCRIPTION.
+
+    Returns
+    -------
+    dframe : TYPE
+        DESCRIPTION.
+
+    """
+    it_files = Path(root_path).rglob(glob_pattern) if recursive else Path(root_path).glob(glob_pattern)    
+    lst_df = []
+    for full_path in it_files:
+        print(full_path)
+        df = read_func(full_path, **kwargs)
+        lst_df.append(df)
+    
+    dframe = pd.concat(lst_df, axis=0, ignore_index=ignore_index)
+    return dframe
+
+    
+def create_dataset_train_val(df_folder_path, random_state=42, test_size=25000, 
                              max_input_length=200, max_target_length=200, train_size=-1, 
                              dataset_name = 'wikipedia_ar_en'):  
-    df = pd.read_parquet(df_path)  
+    df = read_df_folder(df_folder_path)  
     if 'Unnamed: 0' in df.columns:  
         df = df.drop(columns=['Unnamed: 0'])  
       
@@ -75,7 +116,7 @@ def create_dataset_train_val(df_path, random_state=42, test_size=25000,
         'validation' : val_dataset,  
         })  
       
-    data_folder = Path(df_path).parent  
+    data_folder = Path(df_folder_path).parent  
     train_df.to_parquet(data_folder / 'train.parquet')  
     val_df.to_parquet(data_folder / 'validation.parquet')  
     split_datasets.save_to_disk(data_folder / dataset_name) 
@@ -127,7 +168,7 @@ output_name = get_output_model_name(model_checkpoint,src_lang,tgt_lang)
 
 
 # Load wikipeida dataset
-split_datasets = create_dataset_train_val(df_path='./data/ar_en_translated_custom_df.parquet', 
+split_datasets = create_dataset_train_val(df_folder_path='./data/ar_en', 
                                           max_input_length=max_input_length, 
                                           max_target_length=max_target_length,
                                           train_size=-1) # DO_PRED --> train_size=100 to avoid long tokenization
@@ -209,7 +250,7 @@ f1_scores =[]
 
 del split_datasets
 
-model = AutoModelForSeq2SeqLM.from_pretrained(model_checkpoint)
+model = AutoModelForSeq2SeqLM.from_pretrained(model_checkpoint, attn_implementation="flash_attention_2")
 data_collator = DataCollatorForSeq2Seq(tokenizer, model=model)
 batch = data_collator([tokenized_datasets["train"][i] for i in range(1, 3)])
 

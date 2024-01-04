@@ -69,7 +69,7 @@ def predict(tokenizer, model ,df_samp, col_src='he', dst_lang="eng_Latn", batch_
 
 def main(model_name_or_path, max_samples = 4000):     
     # make predictions (translations)
-    src_lang="heb_Hebr"
+    src_lang="arb_Arab"
     col_src='he'
     dst_lang="eng_Latn"
     model = AutoModelForSeq2SeqLM.from_pretrained(model_name_or_path, torch_dtype=torch.float16).to(device)
@@ -103,6 +103,5 @@ def main(model_name_or_path, max_samples = 4000):
     return df_samp
     
 if __name__ == "__main__":    
-    df_samp = main(model_name_or_path = 'output_models/nllb-200-distilled-600M_heb_eng/checkpoint-172058/')
-    # "/data2/NLP/translation/nllb/output_models/nllb-200-distilled-1.3B_heb_eng_wiki_40000/checkpoint-80448" # "facebook/nllb-200-distilled-1.3B"
-    
+    df_samp = main(model_name_or_path = './nllb-200-distilled-600M_arb_eng/checkpoint-84298/') # 'output_models/nllb-200-distilled-600M_heb_eng/checkpoint-172058/'
+                   
