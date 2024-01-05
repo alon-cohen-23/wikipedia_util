@@ -72,9 +72,8 @@ def main(model_name_or_path, max_samples = 4000):
     src_lang="arb_Arab" # "heb_Hebr"
     col_src='he'
     dst_lang="eng_Latn"
-    model = AutoModelForSeq2SeqLM.from_pretrained(model_name_or_path, torch_dtype=torch.float16).to(device)
+    model = AutoModelForSeq2SeqLM.from_pretrained(model_name_or_path, torch_dtype=torch.float16, attn_implementation='flash_attention_2').to(device)
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, src_lang=src_lang)
-    model = model.to_bettertransformer()
     
     # Read samples, in HF read df row['translation']['he'] and row['translation']['en']
     testset_path = Path('./data/validation.parquet')
