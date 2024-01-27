@@ -27,15 +27,15 @@ import torch
 from transformers import NllbTokenizer, AutoModelForSeq2SeqLM, DataCollatorForSeq2Seq, Seq2SeqTrainingArguments, Seq2SeqTrainer
 from datasets import load_dataset, Dataset, DatasetDict, load_from_disk
 import evaluate
-import wandb
+#import wandb
 
 DO_TRAIN = True
 DO_EVAL = True
 DO_PREDICT = True
 
-wandb.login()
+#wandb.login()
 # start a new wandb run to track this script
-wandb.init(project="NLLB-training-project", name = "nllb_600M_ar_en")
+#wandb.init(project="NLLB-training-project", name = "nllb_600M_ar_en")
 
 data_path = Path('./data')
 
@@ -80,6 +80,76 @@ def read_df_folder(root_path, glob_pattern = "*.parquet", recursive=False, ignor
     dframe = pd.concat(lst_df, axis=0, ignore_index=ignore_index)
     return dframe
 
+def create_dataset_train_val____filter_scores(df_folder_path, random_state=42, test_size=25000,   
+                             max_input_length=200, max_target_length=200, train_size=-1,   
+                             dataset_name='wikipedia_ar_en'):    
+    df = read_df_folder(df_folder_path)    
+    if 'Unnamed: 0' in df.columns:    
+        df = df.drop(columns=['Unnamed: 0'])    
+  
+    # Load scores dataframe  
+    scores_df = pd.read_parquet('data/train_comet_scores.parquet')  
+    # Left join df with scores  
+    df = df.merge(scores_df, on=['EN_sentences', 'HE_sentences'], how='left')  
+  
+    # Check if there are any missing comet scores  
+    missing_scores = df[df.comet_score.isna()]  
+  
+    if not missing_scores.empty:  
+        # Load the model  
+        comet_model = load_model("Unbabel/wmt22-cometkiwi-da")  
+  
+        # Convert the df to a list of dicts with 'src' for heb and 'mt' for eng sentences  
+        data = [{'src': row['HE_sentences'], 'mt': row['EN_sentences']} for _, row in missing_scores.iterrows()]  
+  
+        # Calculate the missing scores  
+        model_output = comet_model.predict(data, batch_size=64, gpus=1)  
+  
+        # Assign the calculated scores back to the dataframe  
+        df.loc[df.comet_score.isna(), 'comet_score'] = model_output[0]  
+  
+        # Append the newly calculated scores to the scores dataframe and save it  
+        new_scores = missing_scores.copy()  
+        new_scores['comet_score'] = model_output[0]  
+        scores_df = pd.concat([scores_df, new_scores])  
+        scores_df.to_parquet('data/train_comet_scores.parquet')  
+  
+    # Filter rows with score < 0.6  
+    df = df[df.comet_score >= 0.6]  
+        
+    df = df[df.HE_sentences.str.len() <= max_input_length]    
+    df = df[df.EN_sentences.str.len() <= max_target_length]    
+    df['translation'] = df.apply(lambda row: {'en': row['EN_sentences'], 'he': row['HE_sentences']}, axis=1)      
+        
+    # Drop the original 'EN_sentences' and 'HE_sentences' columns      
+    df = df.drop(columns=['EN_sentences', 'HE_sentences'])      
+  
+       
+    # Split the dataset into a train set and a validation set (small amount)  
+    train_df, val_df = train_test_split(df, test_size=test_size, random_state=random_state)  
+    
+    if train_size > 0:
+      train_df = train_df.iloc[:train_size]  
+      
+    train_dataset = Dataset.from_pandas(train_df)  
+    train_dataset = train_dataset.remove_columns(['__index_level_0__'])  # Remove '__index_level_0__' feature from the datasets  
+    val_dataset = Dataset.from_pandas(val_df)    
+    val_dataset = val_dataset.remove_columns(['__index_level_0__'])  
+    
+    
+    
+  
+    split_datasets = DatasetDict({  
+        'train' : train_dataset,  
+        'validation' : val_dataset,  
+        })  
+      
+    data_folder = Path(df_folder_path).parent  
+    train_df.to_parquet(data_folder / 'train.parquet')  
+    val_df.to_parquet(data_folder / 'validation.parquet')  
+    split_datasets.save_to_disk(data_folder / dataset_name) 
+    return split_datasets  
+  
     
 def create_dataset_train_val(df_folder_path, random_state=42, test_size=25000, 
                              max_input_length=200, max_target_length=200, train_size=-1, 
@@ -143,7 +213,7 @@ def get_output_model_name(model_checkpoint,src_lang,tgt_lang):
         output_name  = model_checkpoint[index + 1:]        
     
     output_name += f'_{src_lang.split("_")[0]}_{tgt_lang.split("_")[0]}'
-    wandb.log({ "output_name": f"{output_name}" } )
+    #wandb.log({ "output_name": f"{output_name}" } )
     return output_name
 
 
@@ -229,7 +299,7 @@ def compute_metrics(eval_preds):
 
     # Log F1 score to WandB
     res = {"sacrebleu": scalerbleu_result["score"], "f1_score": f1}
-    wandb.log(res)
+    #wandb.log(res)
 
     # Append the F1 score to the list for tracking
     f1_scores.append(f1)
@@ -272,7 +342,7 @@ args = Seq2SeqTrainingArguments(
     do_train=DO_TRAIN,
     do_eval=True,
     fp16=True,
-    report_to="wandb"
+    #report_to="wandb"
     )
 
 trainer = Seq2SeqTrainer(
@@ -286,7 +356,7 @@ trainer = Seq2SeqTrainer(
 
 )
 # Access the F1 scores for each evaluation step and log them as a series
-wandb.log({"f1_scores_series": wandb.Table(data=f1_scores, columns=["F1 Score"])})
+#wandb.log({"f1_scores_series": wandb.Table(data=f1_scores, columns=["F1 Score"])})
 
 # trainer.evaluate(max_length=max_target_length)
 if DO_TRAIN:
@@ -324,7 +394,7 @@ if DO_PREDICT:
             df.to_parquet(Path(args.output_dir) / 'predictions.parquet')              
             
                 
-wandb.finish()
+#wandb.finish()
 # trainer.evaluate(max_length=max_target_length)
 # trainer.push_to_hub(tags="translation", commit_message="Training complete")
 
