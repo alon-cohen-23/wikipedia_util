@@ -310,6 +310,7 @@ tokenized_datasets = split_datasets.map(
     preprocess_function,
     batched=True,
     remove_columns=split_datasets["train"].column_names,
+    num_proc=22
 )
 
 print (tokenized_datasets)
