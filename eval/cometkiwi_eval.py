@@ -43,9 +43,13 @@ def calc_comet_score(comet_model, df_samp, col_src, col_dst, col_ref=None):
     """
     data = []
     for index, row in df_samp.iterrows():  
+         if isinstance(col_dst, list):  # check if col_dst is a list  
+            mt_value = row.get(col_dst[0]).get(col_dst[1])  
+        else:  
+            mt_value = row[col_dst]
         data.append({  
             'src': row['translation'][col_src],  
-            'mt': row[col_dst]  # TODO:HIGH:Restore: row[col_dst] row['translation']['en']  
+            'mt': mt_value  
         })  
       
     model_output = comet_model.predict(data, batch_size=64, gpus=1)
@@ -89,6 +93,7 @@ def main(model_name_or_path, max_samples = 4000):
     
     comet_model_path = download_model("Unbabel/wmt22-cometkiwi-da")
     comet_model = load_from_checkpoint(comet_model_path)
+    # TODO:HIGH:Restore: col_dst='pred' or col_dst=['translation']['en']
     df_samp = calc_comet_score(comet_model=comet_model, df_samp=df_samp, col_src=col_src, col_dst='pred')
     Path('./temp').mkdir(exist_ok=True)
     df_samp.to_parquet('./temp/test_commet.parquet')
