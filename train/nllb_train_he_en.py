@@ -35,7 +35,7 @@ DO_PREDICT = True
 
 wandb.login()
 # start a new wandb run to track this script
-wandb.init(project="NLLB-training-project", name = "nllb_600M_ar_en")
+wandb.init(project="NLLB-training-project", name = "nllb_600M_ar_en_yonatan_telegram_remove_dups")
 
 data_path = Path('./data')
 
@@ -90,6 +90,7 @@ def create_dataset_train_val(df_folder_path, random_state=42, test_size=25000,
       
     df = df[df.HE_sentences.str.len() <= max_input_length]  
     df = df[df.EN_sentences.str.len() <= max_target_length]  
+    df = df.drop_duplicates(subset=['HE_sentences'])
     df['translation'] = df.apply(lambda row: {'en': row['EN_sentences'], 'he': row['HE_sentences']}, axis=1)    
       
     # Drop the original 'EN_sentences' and 'HE_sentences' columns    
@@ -250,7 +251,7 @@ f1_scores =[]
 
 del split_datasets
 
-model = AutoModelForSeq2SeqLM.from_pretrained(model_checkpoint, attn_implementation="flash_attention_2")
+model = AutoModelForSeq2SeqLM.from_pretrained(model_checkpoint)
 data_collator = DataCollatorForSeq2Seq(tokenizer, model=model)
 batch = data_collator([tokenized_datasets["train"][i] for i in range(1, 3)])
 
