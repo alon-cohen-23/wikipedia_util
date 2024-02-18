@@ -4,7 +4,7 @@ from acronyms_utils import *
 # from sentence_splitter import split_sentence, detokenize_sentence, SPLIT_MODE
 from sentence_splitter import sentenceSplitterDicta, sentenceDefaultSplitter
 
-TRIE_SUPPORT = False
+TRIE_SUPPORT = True
 if TRIE_SUPPORT:
     from trie import Trie
 
@@ -77,25 +77,32 @@ def add_acronym_meaning(sentence, d_meaning, acronyms_container, sentence_splitt
 
 if __name__=='__main__':
     d_meaning, acronyms_container = get_acronym_datastructures(
-        'C:\\Users\\MICHALD2\\projects\\Translator\\wikipedia_util\\acronyms\\data\\output_acronyms_from_wiktionary.csv')
-    # test(d_meaning, acronyms_sorted)
+        'C:\\Users\\MICHALD2\\projects\\Translator\\wikipedia_util\\acronyms\\data\\outputs\\output_acronyms_from_wiktionary.csv')
 
-    par_file = 'C:\\Users\\MICHALD2\\projects\\Translator\\Michal\\sentences\\all_pages.parquet'
-    df_inss = pd.read_parquet(par_file, engine='pyarrow')
-    # df_inss.head()
 
     sentence_splitter =  sentenceSplitterDicta() #sentenceDefaultSplitter()
-    counter = 0
-    modified_all = set()
-    for i, row in df_inss.iterrows():
-        sentence = row['HE_sentences']
-        new_sentence, modified = add_acronym_meaning(sentence, d_meaning, acronyms_container, sentence_splitter)
-        # if is_modified:
-        if len(modified) > 0:
-            if len(modified.intersection(modified_all)) == 0:
-                counter += 1
-                print('------')
-                print(sentence)
-                print(new_sentence)
-            modified_all.update(modified)
-        if counter == 10: break
+
+    sentence = '''התערבות בפוליטיקה הפנימית בישראל באמצעות הפעלת לחץ ישיר על רע"ם לפרוש מהממשלה.'''
+    new_sentence, modified = add_acronym_meaning(sentence, d_meaning, acronyms_container, sentence_splitter)
+    print(sentence)
+    print(new_sentence)
+
+
+
+    # par_file = 'C:\\Users\\MICHALD2\\projects\\Translator\\Michal\\sentences\\inss_all_pages.parquet'
+    # df_inss = pd.read_parquet(par_file, engine='pyarrow')
+
+    # counter = 0
+    # modified_all = set()
+    # for i, row in df_inss.iterrows():
+    #     sentence = row['HE_sentences']
+    #     new_sentence, modified = add_acronym_meaning(sentence, d_meaning, acronyms_container, sentence_splitter)
+    #     # if is_modified:
+    #     if len(modified) > 0:
+    #         if len(modified.intersection(modified_all)) == 0:
+    #             counter += 1
+    #             print('------')
+    #             print(sentence)
+    #             print(new_sentence)
+    #         modified_all.update(modified)
+    #     if counter == 20: break

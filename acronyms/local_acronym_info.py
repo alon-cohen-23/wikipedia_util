@@ -134,16 +134,16 @@ def results2df(res_filename, df_file):
 
 if __name__=='__main__':
     # document = 'האסטרטגיה הישראלית בזירה זו בשנים האחרונות זכתה לכותרת "המערכה שבין המלחמות" (מב"מ).'
-    # document = 'הרמטכ"ל (ראש המטה הכללי) הורה לעשות את זה'
+    document = 'הרמטכ"ל (ראש המטה הכללי) הורה לעשות את זה'
     # document = 'צבא ההגנה לישראל (צה"ל) ינצח'
-    # sentence_splitter = sentenceSplitterDicta()
-    # res = create_local_acronym_info(document, sentence_splitter)
-    # print(res)
+    sentence_splitter = sentenceSplitterDicta()
+    res = create_local_acronym_info(document, sentence_splitter)
+    print(res)
     #
-    res_filename = 'data\\outputs\\local_acronyms.pickle'
-    sources = [('''C:\\Users\\MICHALD2\\projects\\Translator\\Michal\\sentences\\inss_all_pages.parquet''', 'inss'),
-               ('''C:\\Users\\MICHALD2\\projects\\Translator\\Michal\\sentences\\translated_df_relevant_cats.parquet''', 'wiki')]
-    df_file = 'data\\outputs\\df_local_dict.csv'
-    collect_opened_form(sources, res_filename)
-    print('finished collecting opened form')
-    results2df(res_filename, df_file)
+    # res_filename = 'data\\outputs\\local_acronyms.pickle'
+    # sources = [('''C:\\Users\\MICHALD2\\projects\\Translator\\Michal\\sentences\\inss_all_pages.parquet''', 'inss'),
+    #            ('''C:\\Users\\MICHALD2\\projects\\Translator\\Michal\\sentences\\translated_df_relevant_cats.parquet''', 'wiki')]
+    # df_file = 'data\\outputs\\df_local_dict.csv'
+    # collect_opened_form(sources, res_filename)
+    # print('finished collecting opened form')
+    # results2df(res_filename, df_file)

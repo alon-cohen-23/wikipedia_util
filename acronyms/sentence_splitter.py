@@ -119,10 +119,10 @@ class sentenceSplitterDicta(sentenceDefaultSplitter):
 
 
 if __name__=='__main__':
-    sentence = 'בשנת 1948 השלים אפרים קישון את לימודיו בפיסול מתכת ובתולדות האמנות והחל לפרסם מאמרים הומוריסטיים'
+    # sentence = 'בשנת 1948 השלים אפרים קישון את לימודיו בפיסול מתכת ובתולדות האמנות והחל לפרסם מאמרים הומוריסטיים'
     # sentence = 'וכשהרמטכ"ל'
     sentence = 'המל"טים המריאו בחשיכה'
-    sentence = 'המל"טים'
+    # sentence = 'המל"טים'
     print(sentence)
     # sentence_splitter = sentenceDefaultSplitter()
     sentence_splitter = sentenceSplitterDicta()
