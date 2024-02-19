@@ -156,6 +156,20 @@ def main():
 
 
 def replace_ner(sets_dict: dict[str, tuple[set, list]], ner_prediction, sentence):
+    """
+
+    Parameters
+    ----------
+    sets_dict: The ner lists, one time as a set (check if ner exist) the second as list (for sampling)
+    ner_prediction:
+    sentence
+
+    Returns
+    -------
+    Returns a sentence with replaced ner
+    """
+    # Finding all places the sentence can be augmented.
+    # List if start end location in sentence the bool is True if location.
     ner_index: List[tuple[int, int, bool]] = []
     start_person = -1
     start_location = -1
@@ -174,19 +188,19 @@ def replace_ner(sets_dict: dict[str, tuple[set, list]], ner_prediction, sentence
         elif label != EntityLabels.EndLoc and start_location >= 0:
             ner_index.append((start_location, index, True))
             start_location = -1
+    # Create the new sentence.
     new_sentence = []
     last_index = 0
     counter = 0
     for ind, t in enumerate(ner_index):
         new_sentence.extend(sentence[last_index: t[0]])
-        # TODO: deal with "כלב"
         if t[2]:
             ner_type = 'locations'
         else:
             ner_type = 'first_names'
         ner = random.sample(sets_dict[ner_type][1], 1)[0]
-        current_ner = sentence[t[0]]
-        o = re.search('^([משלוב]|כש)', current_ner)
+        current_ner = " ".join(sentence[t[0]: t[1]])
+        o = re.search('^(כש|ול|[משלוב])', current_ner)
         last_index = t[1]
         if o is None:
             if current_ner == 'אבו':
@@ -286,30 +300,60 @@ def load_models(model_checkpoint):
     return tokenizer, model
 
 
-def check_ner_replacement():
-    tokenizer, model = load_models(
-        r"/home/urihein/PycharmProjects/wikipedia_util/ner/HeRo-finetuned-ner/checkpoint-5500")
-    data_path = Path(r"/home/urihein/data")
+def check_ner_replacement(
+        ner_model_location=None,
+        dictionaries_location=None,
+        base_file_location=None,
+        out_file_location=None,
+        number_of_augmentations=20):
+    """
+
+    Parameters
+    ----------
+    number_of_augmentations: the number of augmentations for each valid sentence in the given dataset.
+    ner_model_location: path to the trained ner model and tokenizer.
+    dictionaries_location: path to the directory where the ner replacement list are.
+    base_file_location: path to the parquet file holding all data to be augmented.
+    out_file_location: path to the output directory.
+
+    Returns
+    -------
+    Save the augmented data in csv file.
+    """
+    # Load the ner model
+    ner_model_location = Path(ner_model_location) if ner_model_location is not None \
+        else Path(__file__).parent / "HeRo-finetuned-ner" / "checkpoint-5500"
+    tokenizer, model = load_models(ner_model_location)
+    data_path = Path(dictionaries_location) if dictionaries_location is not None else Path(__file__).parent / "ner_list"
     # iter_in = ['כשאלכס ויותם הלכו לתל-אביב לפגוש את יוסי ויוני הם ראו צבי']
-    # iter_in = ['רק שלשום הוא נתן את הכסף הזה לבאשיר.']
-    df = pd.read_parquet(r"/home/urihein/Downloads/all_pages.parquet")
-    iter_in = df.iloc[:, 1]
+    # iter_in = ['אולם להבנתנו לישראל ולערב הסעודית אינטרסים משותפים גם בסוגיות אחרות, ביניהן המלחמה בדאע"ש וההתנגדות '
+    #            'לאחים המוסלמים ולחמאס, כמו גם שימור היחסים המיוחדים עם ארצות הברית.']
+    base_file_location = Path(
+        base_file_location) if base_file_location is not None else Path(r"/home/urihein/data/voice/ner/inss")
+    # Load the ner dictionaries.
     name_location_sets = {}
     for n in ['first_names', 'last_names', 'locations']:
         f = data_path / f"{n}.txt"
         s = set(f.read_text('utf-8').strip().split(', '))
         name_location_sets[n] = (s, list(s))
+    # Load the dataset to be augmented.
+    df = pd.read_parquet(base_file_location / "all_pages.parquet")
+    iter_in = df.iloc[:, 1]
+    # Create the augmented data
     res = []
     for i, sentence in enumerate(iter_in):
         if i % 100 == 0:
             print(f"{i} / {len(iter_in)}")
         labels, sentence_list = one_sentence(tokenizer, model, sentence)
-        new_sentence, number_of_replacement = replace_ner(name_location_sets, labels, sentence_list)
-        if number_of_replacement > 0:
-            res.append((sentence, new_sentence, number_of_replacement))
+        for _ in range(number_of_augmentations):
+            new_sentence, number_of_replacement = replace_ner(name_location_sets, labels, sentence_list)
+            if number_of_replacement > 0:
+                # res.append((sentence, new_sentence, number_of_replacement))
+                res.append(new_sentence)
     res_df = pd.DataFrame(res)
     print(f"Create {res_df.shape[0]} new sentences from {len(iter_in)} sentences")
-    res_df.to_csv(r"/home/urihein/Downloads/all_pages_res.csv")
+    out_file_location = Path(out_file_location) if out_file_location is not None else base_file_location
+    res_df.to_csv(out_file_location / "all_pages_res.csv")
 
 
 if __name__ == "__main__":

@@ -57,8 +57,8 @@ def full_flow(input_path: str, input_name: str, output_root: str, steps: List[Fl
     en_folder_path.mkdir(parents=True, exist_ok=True)
 
     input_pages_file = output_named / "all_pages.parquet"
-    output_translated_file = output_named / "translated_{input_name}.parquet"
-    output_translated_file_final = output_named / "translated_{input_name}_final.parquet"
+    output_translated_file = output_named / f"translated_{input_name}.parquet"
+    output_translated_file_final = output_named / f"translated_{input_name}_final.parquet"
 
     # step: prepare the df
     if FlowSteps.ReadInputIntoDfAndFilter in steps:
@@ -102,5 +102,5 @@ def full_flow(input_path: str, input_name: str, output_root: str, steps: List[Fl
 
 
 if __name__ =='__main__':
-    full_flow(input_path=r"d:/workspace/tr_data/inss/data", input_name="inss", output_root=r"d:/workspace/tr_data",
-              steps=AllSteps)
+    full_flow(input_path=r"/home/urihein/data/voice/ner", input_name="teheran", output_root=r"/home/urihein/data/voice/ner",
+              steps=[FlowSteps.PrepareDfForPipeline])

@@ -62,7 +62,7 @@ def split_df(df, he_folder_path=None):
     The function us necessary because google translate can not work with files that are bigger than about 30000 rows.
     """
     copied_df = df.copy()
-    copied_df = copied_df.drop(columns=['title'])
+    copied_df = copied_df.drop(columns=['title'], errors='ignore')
 
     for number in range(int(len(df) // 30000 + 1)):  # the max size for google translate
         if len(df) > 30000:
