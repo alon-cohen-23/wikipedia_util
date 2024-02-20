@@ -114,25 +114,36 @@ def tokenize_and_align_labels(examples, tokenizer, label_map, label2index_map, l
     return tokenized_inputs
 
 
-def main():
-    task = "ner"  # Should be one of "ner", "pos" or "chunk"
-    model_checkpoint = 'HeNLP/HeRo'
-    batch_size = 16
-    out_dir = Path(r"/home/urihein/data/voice/ner/")
-    out_dir.mkdir(exist_ok=True, parents=True)
+def main(out_dir=None, train_data=None, test_data=None):
+    """
 
-    datasets: DatasetDict = create_dataset(train_file=r"/home/urihein/Downloads/token-multi_gold_train.bmes",
-                                           test_file=r"/home/urihein/Downloads/token-single_gold_test.bmes")
+    Returns
+    -------
+    Based on trained transformer fine-tuned for the ner problem.
+    """
+    # Prepare constants.
+    model_checkpoint = 'HeNLP/HeRo'
+    model_name = model_checkpoint.split("/")[-1]
+    batch_size = 16
+    out_dir = out_dir if out_dir is not None else Path(__file__).parent / f"{model_name}-finetuned-ner"
+    train_data = train_data if train_data is not None else r"/home/urihein/Downloads/token-multi_gold_train.bmes"
+    test_data = test_data if test_data is not None else r"/home/urihein/Downloads/token-single_gold_test.bmes"
+    out_dir = Path(out_dir)
+    out_dir.mkdir(exist_ok=True, parents=True)
+    # Create datasets.
+    datasets: DatasetDict = create_dataset(train_file=train_data, test_file=test_data)
     label_list, label_map, label2index_map, index2label_map = get_labels_maps()
     tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
     tokenized_datasets = datasets.map(
         partial(tokenize_and_align_labels, tokenizer=tokenizer, label_map=label_map, label2index_map=label2index_map),
         batched=True)
+    data_collator = DataCollatorForTokenClassification(tokenizer)
+
+    # Load pretrained model.
     model = AutoModelForTokenClassification.from_pretrained(model_checkpoint, num_labels=len(label_list))
-    model_name = model_checkpoint.split("/")[-1]
+    # Collect training arguments.
     args = TrainingArguments(
         output_dir=str(out_dir),
-        # f"{model_name}-finetuned-{task}",
         evaluation_strategy="epoch",
         learning_rate=2e-5,
         per_device_train_batch_size=batch_size,
@@ -141,7 +152,6 @@ def main():
         weight_decay=0.01,
         report_to=[]
     )
-    data_collator = DataCollatorForTokenClassification(tokenizer)
     metric = load_metric("seqeval")
     trainer = Trainer(
         model,
@@ -233,8 +243,21 @@ def replace_ner(sets_dict: dict[str, tuple[set, list]], ner_prediction, sentence
 
 
 def test(model_checkpoint, test_file):
+    """
+
+    Parameters
+    ----------
+    model_checkpoint: ner model to test.
+    test_file
+
+    Returns
+    -------
+    Test ner model
+    """
+    # Load model and tokenizer.
     tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
     model = AutoModelForTokenClassification.from_pretrained(model_checkpoint)
+    # Prepare dataset.
     test_data = parse_file(Path(test_file))
     test_dataset = Dataset.from_list(test_data)
     label_list, label_map, label2index_map, index2label_map = get_labels_maps()
@@ -242,16 +265,18 @@ def test(model_checkpoint, test_file):
         partial(tokenize_and_align_labels, tokenizer=tokenizer, label_map=label_map, label2index_map=label2index_map),
         batched=True)
     data_collator = DataCollatorForTokenClassification(tokenizer)
+    # collect argument for testing.
     metric = load_metric("seqeval")
-
     trainer = Trainer(model,
                       data_collator=data_collator,
                       tokenizer=tokenizer,
                       compute_metrics=partial(compute_metrics, metric=metric, label_list=label_list)
                       )
+    # Test.
     predictions, labels, _ = trainer.predict(tokenized_test_set)
-    predictions = np.argmax(predictions, axis=2)
 
+    # Evaluate results.
+    predictions = np.argmax(predictions, axis=2)
     # Remove ignored index (special tokens)
     true_predictions = [
         [label_list[p] for (p, l) in zip(prediction, label) if l != -100]
