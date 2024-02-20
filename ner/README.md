@@ -26,3 +26,5 @@ We solve it by detecting the prefix and replacing the word only if the remaining
 (This process is in *"check_ner_replacement"* in *train.py*).
 
 This process results in an augmented dataset that can be translated and added to the training data.
+Note that we can not expect better results than the translator we use (Google Translate).
+A way to overcome this shortcoming is by directly replacing the name in the translation using transcription.
