@@ -43,9 +43,13 @@ def calc_comet_score(comet_model, df_samp, col_src, col_dst, col_ref=None):
     """
     data = []
     for index, row in df_samp.iterrows():  
+         if isinstance(col_dst, list):  # check if col_dst is a list  
+            mt_value = row.get(col_dst[0]).get(col_dst[1])  
+        else:  
+            mt_value = row[col_dst]
         data.append({  
             'src': row['translation'][col_src],  
-            'mt': row[col_dst]  # TODO:HIGH:Restore: row[col_dst] row['translation']['en']  
+            'mt': mt_value  
         })  
       
     model_output = comet_model.predict(data, batch_size=64, gpus=1)
@@ -69,12 +73,11 @@ def predict(tokenizer, model ,df_samp, col_src='he', dst_lang="eng_Latn", batch_
 
 def main(model_name_or_path, max_samples = 4000):     
     # make predictions (translations)
-    src_lang="heb_Hebr"
+    src_lang="arb_Arab" # "heb_Hebr"
     col_src='he'
     dst_lang="eng_Latn"
-    model = AutoModelForSeq2SeqLM.from_pretrained(model_name_or_path, torch_dtype=torch.float16).to(device)
+    model = AutoModelForSeq2SeqLM.from_pretrained(model_name_or_path, torch_dtype=torch.float16, attn_implementation='flash_attention_2').to(device)
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, src_lang=src_lang)
-    model = model.to_bettertransformer()
     
     # Read samples, in HF read df row['translation']['he'] and row['translation']['en']
     testset_path = Path('./data/validation.parquet')
@@ -90,6 +93,7 @@ def main(model_name_or_path, max_samples = 4000):
     
     comet_model_path = download_model("Unbabel/wmt22-cometkiwi-da")
     comet_model = load_from_checkpoint(comet_model_path)
+    # TODO:HIGH:Restore: col_dst='pred' or col_dst=['translation']['en']
     df_samp = calc_comet_score(comet_model=comet_model, df_samp=df_samp, col_src=col_src, col_dst='pred')
     Path('./temp').mkdir(exist_ok=True)
     df_samp.to_parquet('./temp/test_commet.parquet')
@@ -103,6 +107,5 @@ def main(model_name_or_path, max_samples = 4000):
     return df_samp
     
 if __name__ == "__main__":    
-    df_samp = main(model_name_or_path = 'output_models/nllb-200-distilled-600M_heb_eng/checkpoint-172058/')
-    # "/data2/NLP/translation/nllb/output_models/nllb-200-distilled-1.3B_heb_eng_wiki_40000/checkpoint-80448" # "facebook/nllb-200-distilled-1.3B"
-    
+    df_samp = main(model_name_or_path = './nllb-200-distilled-600M_arb_eng/checkpoint-141286/') # 'output_models/nllb-200-distilled-600M_heb_eng/checkpoint-172058/'
+                   
