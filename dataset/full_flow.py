@@ -64,7 +64,6 @@ def full_flow(input_path: str, input_name: str, output_root: str, steps: List[Fl
     if FlowSteps.ReadInputIntoDfAndFilter in steps:
         # currently, assumes input is a collection of text file which possibly isn't true for wiki data collected
         # need to adapt the wikipedia code and call it here if input_name=="wiki"
-        # this code assumes the structure of the
         df = read_all_files(input_path)
         df = filter_sentences_df(df)  # filter the df by calling the function from df_process.py
         df.to_parquet(input_pages_file)
