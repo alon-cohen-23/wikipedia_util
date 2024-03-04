@@ -1,5 +1,5 @@
 from typing import List
-from dataset.persistency.source_db import SourceDB
+from utils.persistency.source_db import SourceDB
 
 
 class EntryDB:

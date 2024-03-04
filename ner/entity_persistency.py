@@ -1,8 +1,7 @@
 from tinydb import TinyDB, Query
 
-from typing import List, Tuple
-from dataset.persistency.source_db import SourceDB
-from dataset.persistency.entry_db import EntryDB
+from typing import Tuple
+from utils.persistency.entry_db import EntryDB
 
 
 class EntityDB(EntryDB):

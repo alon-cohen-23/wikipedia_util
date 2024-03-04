@@ -1,5 +1,8 @@
 # Directory Contents
 The notebooks in this directory were run (using Jupyter notebook) on the Azure machine with the GPUs.
+A note about wandb:
+- Create user.
+- When running, put the API key in the WANDB_API_KEY environment variable
 
 ## PreprocessData
 The code in this notebook is based on the beginning of: train/nllb_train_he_en.py
@@ -14,4 +17,5 @@ Predicate, run comet and save results to a file.
 
 ## ExportModel
 Save the model to disk.
+
 

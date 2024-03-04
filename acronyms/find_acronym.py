@@ -1,9 +1,8 @@
 import regex
 import pandas as pd
 from tinydb import TinyDB, Query
-from typing import Tuple, List
-from dataset.persistency.source_db import SourceDB
-from dataset.persistency.entry_db import EntryDB
+from typing import Tuple
+from utils.persistency.entry_db import EntryDB
 
 
 class AcronymDB(EntryDB):

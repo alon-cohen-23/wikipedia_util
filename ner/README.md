@@ -28,3 +28,14 @@ We solve it by detecting the prefix and replacing the word only if the remaining
 This process results in an augmented dataset that can be translated and added to the training data.
 Note that we can not expect better results than the translator we use (Google Translate).
 A way to overcome this shortcoming is by directly replacing the name in the translation using transcription.
+
+
+### Code
+The code for NER (Named-entity recognition) allows identifying entities within text with their type (person, location, organization, misc.).
+There are two use cases:
+1. Identify and store in a (TinyDB) DB
+2. Same as #1 but also replace the entity in the source dataset with a unique identifier
+
+Notice that #2 is another step in full_flow.py (and requires the entities DB location as input) but both use cases are implemented starting in ner/entity_operations.py
+
+Notice that the model checkpoint is global within ner/entity_operations.py
