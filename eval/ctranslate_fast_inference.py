@@ -1,38 +1,44 @@
+import time
+from pathlib import Path
+import numpy as np
+import pandas as pd
+from transformers import AutoTokenizer
+import ctranslate2
 
-def ctranslate2_translate_batch(tokenizer, translator ,df_samp, col_src='he', dst_lang="eng_Latn", batch_size = 500):
-    
-	src_texts = []
-    for index, row in df_samp.iterrows():  
+device = "cuda"
+
+def predict(tokenizer, translator ,df_samp, col_src='he', dst_lang='eng_Latn', batch_size = 2000):    
+    src_texts = []
+    for index, row in df_samp.iterrows():
         src_texts.append(row['translation'][col_src])
 
-
+    start = time.perf_counter()
     translated_texts = []
     batches = [src_texts[i:i + batch_size] for i in range(0, len(src_texts), batch_size)]
     for batch in batches:
         # Tokenize the source texts using the tokenizer
         src_tokens = [tokenizer.tokenize(text, add_special_tokens=True) for text in batch]
-
+    
         # Translate the batch using CTranslate2
-        results = translator.translate_batch(src_tokens, target_prefix=[dst_lang]*len(src_tokens))
-
+        results = translator.translate_batch(src_tokens, target_prefix=[[dst_lang]]*len(src_tokens))
+        print('*')
         # Decode the target tokens to text
         decoded_texts = [tokenizer.decode(tokenizer.convert_tokens_to_ids(result.hypotheses[0][1:])) for result in results]
 
         translated_texts += decoded_texts
-
+    tot_time = time.perf_counter() - start
+    print(f'predict time: {tot_time}')
+    
     return translated_texts
-
-
-
 
 
 def main(ct2_model_name_or_path, tok_name_or_path, max_samples = 4000):     
     # make predictions (translations)
     src_lang='eng_Latn' # "arb_Arab" # "heb_Hebr"
-    col_src='he'
+    col_src='en'
     dst_lang='heb_Hebr'
-    translator = ctranslate2.Translator(ct2_model_name_or_path)
-    tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, src_lang=src_lang)
+    translator = ctranslate2.Translator(ct2_model_name_or_path, device=device)
+    tokenizer = AutoTokenizer.from_pretrained(tok_name_or_path, src_lang=src_lang)
     
     # Read samples, in HF read df row['translation']['he'] and row['translation']['en']
     testset_path = Path('./data/validation.parquet')
