@@ -21,3 +21,4 @@ transformers
 triton
 unbabel-comet
 wandb
+regex
