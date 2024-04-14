@@ -1,4 +1,5 @@
 import time
+from pathlib import Path
 import pandas as pd
 from loguru import logger
 import wikipediaapi
@@ -59,9 +60,10 @@ def get_pages_and_subcategories(top_categories, max_depth=6, language='he'):
 
 
 # Example usage:
-lang = 'ar'
+lang = 'fa' # Select lang and edit lang --> categories dict 
 top_categories = {'ar': ["تصنيف:عسكرية", "تصنيف:نزاع_عنيف", "تصنيف:نزاع", "تصنيف:الشرق_الأوسط"],
-                  'he': ["קטגוריה:צבא", "קטגוריה:לחימה", "קטגוריה:סכסוכים", "קטגוריה:המזרח_התיכון"]
+                  'he': ["קטגוריה:צבא", "קטגוריה:לחימה", "קטגוריה:סכסוכים", "קטגוריה:המזרח_התיכון"],
+                  'fa': ["رده:نظامی‌گری", "رده:مبارزه", "رده:ناسازگاری", "رده:خاورمیانه"]
                   }
 # top_categories =
 pages, subcategories = get_pages_and_subcategories(top_categories[lang], language=lang)
@@ -71,9 +73,12 @@ pages_df = pd.DataFrame({"Page": pages})
 subcategories_df = pd.DataFrame({"Subcategory": subcategories})
 
 # Define paths for the Parquet files
+
 pages_file_path = f"relevant_pages_{lang}.parquet"
 subcategories_file_path = f"relevant_subcategories_{lang}.parquet"
 
 # Write dataframes to Parquet files
-pages_df.to_parquet(pages_file_path)
-subcategories_df.to_parquet(subcategories_file_path)
+pages_cat_folder=Path(f'categories_pages/{lang}')
+pages_cat_folder.mkdir(parents=True, exist_ok=True)
+pages_df.to_parquet(pages_cat_folder / 'pages.parquet')
+subcategories_df.to_parquet(pages_cat_folder / 'categories.parquet')

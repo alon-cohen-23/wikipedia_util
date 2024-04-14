@@ -6,6 +6,7 @@ Created on Thu Sep  7 17:05:05 2023
 """
 
 import re
+from pathlib import Path
 import mwxml
 import mwparserfromhell
 from nltk.tokenize import sent_tokenize
@@ -20,9 +21,6 @@ def process_dump(dump, path):
         yield page
 
 
-dump_path = r'path/to/xml'
-paths = [dump_path]
-dump_gen = mwxml.map(process_dump, paths)
 
 
 def extract_rev_first_para(rev_text):
@@ -66,7 +64,7 @@ def extract_first_first_bold_span_from_1st_sent(lines):
     return bold_spans
 
 
-def main(pages_df_path):
+def main(lang, dump_gen, pages_df_path):
     """
     Returns
     -------
@@ -74,12 +72,9 @@ def main(pages_df_path):
     title: the title of the wikipedia value that contain the given sentence.
 
     """
-    pages_df = pd.read_parquet(pages_df_path)
-
-    pages = pages_df['Page'].to_list()
     data_frames = []  # Create a list to store DataFrames
 
-    relevant_values_df = pd.read_parquet('categories_pages/he/pages.parquet')
+    relevant_values_df = pd.read_parquet(pages_df_path)
     relevant_values_titles = relevant_values_df['Page'].to_list()
 
     for index, page in enumerate(dump_gen):
@@ -98,7 +93,7 @@ def main(pages_df_path):
             print(f'already iterated over {index} values')
 
     sentences_df = pd.concat(data_frames, ignore_index=True)
-    sentences_df = filter_sentences_df(df)  # filter the df by calling the function from df_process.py
+    sentences_df = filter_sentences_df(df, lang)  # filter the df by calling the function from df_process.py
 
     return sentences_df
 
@@ -139,11 +134,17 @@ def extract_page_wikicode(page):
 
 
 if __name__ == '__main__':
-    df = main()
-    df.to_parquet('relevant_categories_sentences.parquet')
-
-    """df = filter_sentences_df (df)
-    split_df (df)
     """
-    pages_df_path = 'categories_pages/he/pages.parquet'
-    df = main(pages_df_path)
+    Input: wikipedia dump + pages.parquet - list of relevant pages --> Output: Sentences from the relevant pages
+    """
+    lang='fa' # Set language code here. Download corresponding dump from 
+    dump_path = fr'wikipedia_dumps/{lang}wiki-latest-pages-articles.xml.bz2'
+    paths = [dump_path]
+    dump_gen = mwxml.map(process_dump, paths)
+    pages_df_path=f'categories_pages/{lang}/pages.parquet' # Input: the pages df of all pages under categories (recursive - see wikipedia-api)
+    df = main(lang, dump_gen, pages_df_path)
+    p_out=Path(f'relevant_categories_sentences.parquet/{lang}')
+    p_out.mkdir(parents=True, exist_ok=True)
+    df.to_parquet(p_out)
+
+    
