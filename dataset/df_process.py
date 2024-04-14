@@ -66,7 +66,7 @@ def detect_lang(cell_content):
     return 'unknown'
 
 
-def split_df(df, he_folder_path=None):
+def split_df(df, folder_path=None):
     """
 
     Parameters
@@ -88,10 +88,10 @@ def split_df(df, he_folder_path=None):
         else:
             part_df = copied_df
 
-        if he_folder_path:
-            part_df.to_excel(f'{he_folder_path}/{number}_part_HE.xlsx', index=False)
+        if folder_path:
+            part_df.to_excel(f'{folder_path}/{number}_part_HE.xlsx', index=False)
         else:
-            part_df.to_excel(f'he_tr_excel/{number}_part_HE.xlsx', index=False)
+            part_df.to_excel(f'split_excel_for_gtranslate/{number}_part_HE.xlsx', index=False)
 
 
 def concat_dir_excels(folder_path):
@@ -134,14 +134,17 @@ if __name__ == '__main__':
     from dataset.gtranslate_selenium import google_translate_folder_of_excels
 
     # the 5 steps of translating a df
+    lang = 'fa'
+    path_df_sentences = f'relevant_categories_sentences/{lang}/relevant_categories_sentences_{lang}.parquet'
+    df = pd.read_parquet(path_df_sentences)  # step 1: read the sentences df (after categories-relevant-pages + dump-parsing + sentence splitting and filtering)
+    split_folder_path = Path('split_excel_for_gtranslate/{lang}/src')  # splited_df saves the files in this folder in excel files
+    split_folder_path.mkdir(parents=True, exist_ok=True)
+    split_df(df, split_folder_path)  # step 2: split the df for Google translate
 
-    df = pd.read_parquet('path/to/df')  # step 1: read the df
-    split_df(df)  # step 2: split the df for Google translate
-
-    he_folder_path = 'he_tr_excel'  # splited_df saves the files in this folder
-    google_translate_folder_of_excels('he_tr_excel')  # step 3: translate the splited files
+    
+    google_translate_folder_of_excels(split_folder_path)  # step 3: translate the splited files
 
     # step 4: move the translated files from the downloads to new folder (or keep the download folder clean from irelevent excel files).
 
-    en_folder_path = 'en_folder_path(change to your own)'
-    create_concatenated_translated_df(he_folder_path, en_folder_path)  # step 5: concat everithing together
+    en_folder_path = Path('split_excel_for_gtranslate/{lang}/dst')
+    create_concatenated_translated_df(split_folder_path, en_folder_path)  # step 5: concat everithing together

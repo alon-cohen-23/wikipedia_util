@@ -83,14 +83,14 @@ def main(lang, dump_gen, pages_df_path):
             if page.title in relevant_values_titles:
                 page_wikicode = extract_page_wikicode(page)
                 page_sentences = extract_sentences_from_wikicode(page_wikicode)
-
+                #print('page_sentences',len(page_sentences))
                 data_frames.append(pd.DataFrame({'title': page.title, 'HE_sentences': page_sentences}))
 
         except:
             print('failed to load {pag.title}')
 
         if index % 10000 == 0:
-            print(f'already iterated over {index} values')
+            print(f'Extracted sentences from {index} pages')
 
     sentences_df = pd.concat(data_frames, ignore_index=True)
     sentences_df = filter_sentences_df(df, lang)  # filter the df by calling the function from df_process.py
@@ -143,7 +143,7 @@ if __name__ == '__main__':
     dump_gen = mwxml.map(process_dump, paths)
     pages_df_path=f'categories_pages/{lang}/pages.parquet' # Input: the pages df of all pages under categories (recursive - see wikipedia-api)
     df = main(lang, dump_gen, pages_df_path)
-    p_out=Path(f'relevant_categories_sentences.parquet/{lang}')
+    p_out=Path(f'relevant_categories_sentences/{lang}/relevant_categories_sentences_{lang}.parquet')
     p_out.mkdir(parents=True, exist_ok=True)
     df.to_parquet(p_out)
 
