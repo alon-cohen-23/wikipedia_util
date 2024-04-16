@@ -6,7 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from pathlib import Path
 import time
-from plyer import notification
+
 from loguru import logger
 
 # Define button constants
@@ -18,6 +18,7 @@ CLEAR_FILE_BUTTON_CSS_SELECTOR = "button[aria-label='Clear file']"
 
 
 def show_tooltip_message(message):
+    from plyer import notification
     notification.notify(
         title="Translation Instructions",
         message=message,
@@ -25,12 +26,13 @@ def show_tooltip_message(message):
     )
 
 
-def google_translate_folder_of_excels(folder_path):
+def google_translate_folder_of_excels(folder_path, dst_lang):
     """
 
     Parameters
     ----------
     folder_path : Path to folder with .xlsx files to translate
+    dst_lang - 'en' to translate to english
     chromedriver_path : Path to the chromr driver
     ***** Important: <= 1MB per file, as it may refuse to translate several larger files in seq
     -------
@@ -58,7 +60,7 @@ def google_translate_folder_of_excels(folder_path):
                 continue
 
             # Navigate to the desired website
-            browser.get("https://translate.google.com/?sl=auto&tl=en&op=docs")
+            browser.get("https://translate.google.com/?sl=auto&tl={dst_lang}&op=docs")
 
             """# Use WebDriverWait to wait for the "Translate" button with a span containing "Translate"
             translate_button = WebDriverWait(browser, 120).until(

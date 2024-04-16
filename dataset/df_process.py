@@ -94,36 +94,41 @@ def split_df(df, folder_path=None):
             part_df.to_excel(f'split_excel_for_gtranslate/{number}_part_HE.xlsx', index=False)
 
 
-def concat_dir_excels(folder_path):
+
+def concat_dir_excels(folder_path, common_files):
     concat_df = pd.DataFrame()
 
-    for file_path in Path(folder_path).glob("*.xlsx"):
+    for file_name in common_files:
+        file_path = Path(folder_path) / file_name
         file_df = pd.read_excel(file_path)
         concat_df = pd.concat([concat_df, file_df], ignore_index=True)
 
     return concat_df
 
-
 def create_concatenated_translated_df(he_folder_path='tr_data/he_tr_excel', en_folder_path='tr_data/en_tr_excel'):
     """
     Parameters
     ----------
-    he_folder_path : path to the folder that contains the splited Hebrew sentences df
-    en_folder : path to the folder that contains the splited translated English sentences df
+    he_folder_path : path to the folder that contains the split Hebrew sentences df
+    en_folder : path to the folder that contains the split translated English sentences df
 
     Returns
     -------
     concatenated df that contains the data of all of the files from both folders, drop the duplicates,
     and has 2 columns: HE_sentences, EN_sentences
     """
-    df = concat_dir_excels(he_folder_path)
+    he_files = set([file.name for file in Path(he_folder_path).glob("*.xlsx")])
+    en_files = set([file.name for file in Path(en_folder_path).glob("*.xlsx")])
 
-    en_df = concat_dir_excels(en_folder_path)
+    common_files = he_files.intersection(en_files)
+
+    df = concat_dir_excels(he_folder_path, common_files)
+
+    en_df = concat_dir_excels(en_folder_path, common_files)
     en_df = en_df.rename(columns={'HE_sentences': 'EN_sentences'})
 
     df['EN_sentences'] = en_df['EN_sentences']
-    df = df.drop_duplicates(
-        subset=['HE_sentences'])  # I translated the duplicates as well so I cant drop them in the beggining
+    df = df.drop_duplicates(subset=['HE_sentences'])
 
     df = df.reset_index(drop=True)
 
@@ -135,16 +140,18 @@ if __name__ == '__main__':
 
     # the 5 steps of translating a df
     lang = 'fa'
+    dst_lang = 'en'
     path_df_sentences = f'relevant_categories_sentences/{lang}/relevant_categories_sentences_{lang}.parquet'
     df = pd.read_parquet(path_df_sentences)  # step 1: read the sentences df (after categories-relevant-pages + dump-parsing + sentence splitting and filtering)
-    split_folder_path = Path('split_excel_for_gtranslate/{lang}/src')  # splited_df saves the files in this folder in excel files
+    split_folder_path = Path(f'split_excel_for_gtranslate/{lang}/src').resolve()  # splited_df saves the files in this folder in excel files
     split_folder_path.mkdir(parents=True, exist_ok=True)
     split_df(df, split_folder_path)  # step 2: split the df for Google translate
 
     
-    google_translate_folder_of_excels(split_folder_path)  # step 3: translate the splited files
+    google_translate_folder_of_excels(split_folder_path, dst_lang)  # step 3: translate the splited files
 
     # step 4: move the translated files from the downloads to new folder (or keep the download folder clean from irelevent excel files).
-
-    en_folder_path = Path('split_excel_for_gtranslate/{lang}/dst')
-    create_concatenated_translated_df(split_folder_path, en_folder_path)  # step 5: concat everithing together
+    
+    en_folder_path = Path(f'split_excel_for_gtranslate/{lang}/dst')
+    df_dataset = create_concatenated_translated_df(split_folder_path, en_folder_path)  # step 5: concat everithing together
+    df_dataset.to_parquet(f'sentences_dataset_{lang}_translated_to_{dst_lang}.parquet')

@@ -89,11 +89,14 @@ def main(lang, dump_gen, pages_df_path):
         except:
             print('failed to load {pag.title}')
 
-        if index % 10000 == 0:
+        if index > 0 and index % 10000 == 0:
             print(f'Extracted sentences from {index} pages')
-
-    sentences_df = pd.concat(data_frames, ignore_index=True)
-    sentences_df = filter_sentences_df(df, lang)  # filter the df by calling the function from df_process.py
+        if index > 0 and index % 100000 == 0:
+           print(f'Saving temp Extracted sentences from {index} pages') 
+           sentences_df = pd.concat(data_frames, ignore_index=True)     
+           sentences_df.to_parquet('./relevant_sentences_temp.parquet')    
+    sentences_df = pd.concat(data_frames, ignore_index=True)    
+    sentences_df = filter_sentences_df(sentences_df, lang)  # filter the df by calling the function from df_process.py
 
     return sentences_df
 
@@ -143,8 +146,8 @@ if __name__ == '__main__':
     dump_gen = mwxml.map(process_dump, paths)
     pages_df_path=f'categories_pages/{lang}/pages.parquet' # Input: the pages df of all pages under categories (recursive - see wikipedia-api)
     df = main(lang, dump_gen, pages_df_path)
-    p_out=Path(f'relevant_categories_sentences/{lang}/relevant_categories_sentences_{lang}.parquet')
+    p_out=Path(f'relevant_categories_sentences/{lang}')
     p_out.mkdir(parents=True, exist_ok=True)
-    df.to_parquet(p_out)
+    df.to_parquet(p_out / f'relevant_categories_sentences_{lang}.parquet')
 
     
