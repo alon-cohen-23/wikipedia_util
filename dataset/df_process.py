@@ -89,9 +89,9 @@ def split_df(df, folder_path=None):
             part_df = copied_df
 
         if folder_path:
-            part_df.to_excel(f'{folder_path}/{number}_part_HE.xlsx', index=False)
+            part_df.to_excel(f'{folder_path}/{number}_part_HE.xlsx', engine='xlsxwriter', index=False)
         else:
-            part_df.to_excel(f'split_excel_for_gtranslate/{number}_part_HE.xlsx', index=False)
+            part_df.to_excel(f'split_excel_for_gtranslate/{number}_part_HE.xlsx', engine='xlsxwriter', index=False)
 
 
 
@@ -134,24 +134,32 @@ def create_concatenated_translated_df(he_folder_path='tr_data/he_tr_excel', en_f
 
     return df
 
-
-if __name__ == '__main__':
+def translate_df(df_sents, dataset_prefix, src_lang, dst_lang):
     from dataset.gtranslate_selenium import google_translate_folder_of_excels
-
-    # the 5 steps of translating a df
-    lang = 'fa'
-    dst_lang = 'en'
-    path_df_sentences = f'relevant_categories_sentences/{lang}/relevant_categories_sentences_{lang}.parquet'
-    df = pd.read_parquet(path_df_sentences)  # step 1: read the sentences df (after categories-relevant-pages + dump-parsing + sentence splitting and filtering)
-    split_folder_path = Path(f'split_excel_for_gtranslate/{lang}/src').resolve()  # splited_df saves the files in this folder in excel files
+    split_folder_path = Path(Path.cwd() / f'./{dataset_prefix}_split_excel_for_gtranslate/{src_lang}/src').resolve()  # splited_df saves the files in this folder in excel files
     split_folder_path.mkdir(parents=True, exist_ok=True)
-    split_df(df, split_folder_path)  # step 2: split the df for Google translate
+    split_df(df_sents, split_folder_path)  # step 2: split the df for Google translate
 
     
     google_translate_folder_of_excels(split_folder_path, dst_lang)  # step 3: translate the splited files
+    return split_folder_path
 
-    # step 4: move the translated files from the downloads to new folder (or keep the download folder clean from irelevent excel files).
+def create_translation_pairs_df(split_folder_path, dataset_prefix, src_lang, dst_lang):    
+    # **** step 4: Manually move the translated files from the downloads to new folder (or keep the download folder clean from irelevent excel files).
     
-    en_folder_path = Path(f'split_excel_for_gtranslate/{lang}/dst')
+    en_folder_path = Path(f'{dataset_prefix}_split_excel_for_gtranslate/{src_lang}/dst')
     df_dataset = create_concatenated_translated_df(split_folder_path, en_folder_path)  # step 5: concat everithing together
-    df_dataset.to_parquet(f'sentences_dataset_{lang}_translated_to_{dst_lang}.parquet')
+    df_dataset.to_parquet(f'{dataset_prefix}_sentences_dataset_{src_lang}_translated_to_{dst_lang}.parquet')
+
+if __name__ == '__main__':
+    
+    # the 5 steps of translating a df
+    src_lang = 'fa'
+    dst_lang = 'en'
+    path_df_sentences = f'relevant_categories_sentences/{src_lang}/relevant_categories_sentences_{src_lang}.parquet'
+    df_sents = pd.read_parquet(path_df_sentences)  # step 1: read the sentences df (after categories-relevant-pages + dump-parsing + sentence splitting and filtering)
+    dataset_prefix='wikipedia'
+    split_folder_path = translate_df(df_sents, dataset_prefix=dataset_prefix, src_lang=src_lang, dst_lang=dst_lang)
+    # **** step 4: Manually move the translated files from the downloads to new folder (or keep the download folder clean from irelevent excel files).
+    create_translation_pairs_df(split_folder_path, dataset_prefix=dataset_prefix)
+    

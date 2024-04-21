@@ -60,7 +60,7 @@ def google_translate_folder_of_excels(folder_path, dst_lang):
                 continue
 
             # Navigate to the desired website
-            browser.get("https://translate.google.com/?sl=auto&tl={dst_lang}&op=docs")
+            browser.get(f"https://translate.google.com/?sl=auto&tl={dst_lang}&op=docs")
 
             """# Use WebDriverWait to wait for the "Translate" button with a span containing "Translate"
             translate_button = WebDriverWait(browser, 120).until(
