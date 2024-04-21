@@ -20,11 +20,11 @@ import evaluate
 model_checkpoint = "facebook/nllb-200-distilled-600M" # 'output_models/nllb-200-distilled-1.3B_heb_eng_wiki_40000/checkpoint-80448/' # "facebook/nllb-200-distilled-1.3B" # "facebook/m2m100_418M" # "facebook/nllb-200-distilled-600M"
 
 # Language codes: https://github.com/facebookresearch/flores/blob/main/flores200/README.md#languages-in-flores-200    
-src_lang = 'heb_Hebr' # "arb_Arab" # "heb_Hebr" 
+src_lang = 'pes_Arab' # "arb_Arab" # "heb_Hebr" # "pes_Arab"
 tgt_lang= 'eng_Latn'
 
 
-df_folder_path = './data/he_en' # './data/ar_en'
+df_folder_path = './data/fa_en' # './data/ar_en' # './data/he_en'
 REVERSE_TRANSLATION_DIRECTION = True
 
 DO_TRAIN = True
@@ -151,7 +151,7 @@ def create_dataset_train_val____filter_scores(df_folder_path, random_state=42, t
     
 def create_dataset_train_val(df_folder_path, random_state=42, test_size=25000, 
                              max_input_length=200, max_target_length=200, train_size=-1, 
-                             dataset_name = 'wikipedia_ar_en'):  
+                             dataset_name = f'wikipedia_{src_lang}_{tgt_lang}'):  
     df = read_df_folder(df_folder_path)  
     if 'Unnamed: 0' in df.columns:  
         df = df.drop(columns=['Unnamed: 0'])  
