@@ -1,0 +1,878 @@
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>word_count</th>
+      <th>lang_cnt</th>
+      <th>translation</th>
+      <th>pred</th>
+      <th>comet_score</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2251271</th>
+      <td>19</td>
+      <td>82</td>
+      <td>{'en': ' Oriental halwa or Berber halwa is common in parts of Razavi Khorasan Province by the Khorasani Orientals in Iran.', 'he': 'حلوای خاوری  یا حلوای بربری در قسمتهایی از استان خراسان رضوی  توسط خاوری‌ های خراسانی در ایران رایج است.'}</td>
+      <td>Eastern halva or Berber halva is common in parts of Razavi Khorasan province by Khorasani easterners in Iran.</td>
+      <td>0.672972</td>
+    </tr>
+    <tr>
+      <th>1216725</th>
+      <td>11</td>
+      <td>34</td>
+      <td>{'en': ' 1- When number 80, by the efforts of the leader of the environment, 8/21/2008', 'he': '۱- هنگام شماره ۸۰ به کوشش هادی محیط ۲۱ /۸ /۱۳۸۴'}</td>
+      <td>1- During number 80 by Hadi Envirom 21/8/1384</td>
+      <td>0.651916</td>
+    </tr>
+    <tr>
+      <th>1134708</th>
+      <td>5</td>
+      <td>23</td>
+      <td>{'en': ' The English book at home', 'he': ' کتاب انگلیسی‌ها در خانهٔ خود'}</td>
+      <td>The book of the English in your home</td>
+      <td>0.635788</td>
+    </tr>
+    <tr>
+      <th>29674</th>
+      <td>5</td>
+      <td>23</td>
+      <td>{'en': ' The official announcement of the Inverted Triangle movie', 'he': ' آنونس رسمی فیلم مثلث واژگون'}</td>
+      <td>The official announcement of the movie Voxagon Triangle</td>
+      <td>0.659543</td>
+    </tr>
+    <tr>
+      <th>1339305</th>
+      <td>15</td>
+      <td>52</td>
+      <td>{'en': ' Yelang walks about 100 meters with his one foot in each step.', 'he': 'یه‌لنگ با همان یک پای خود در هر گام، حدود یکصد متر مسیر را می‌پیماید.'}</td>
+      <td>A lame one foot walks about a hundred meters of the path in each step.</td>
+      <td>0.676484</td>
+    </tr>
+    <tr>
+      <th>222724</th>
+      <td>4</td>
+      <td>16</td>
+      <td>{'en': ' Ten new Khwaja thanks to God', 'he': 'ده نو خواجه شکرالله'}</td>
+      <td>Ten new Khwaja Shokrallah</td>
+      <td>0.639325</td>
+    </tr>
+    <tr>
+      <th>1966099</th>
+      <td>7</td>
+      <td>27</td>
+      <td>{'en': ' (The efforts of the city officials are high!!)', 'he': '( همت بالای مسئولین شهر را میرساند!!)'}</td>
+      <td>(He brings the great effort of the city officials!!)</td>
+      <td>0.680588</td>
+    </tr>
+    <tr>
+      <th>1012015</th>
+      <td>8</td>
+      <td>44</td>
+      <td>{'en': ' Karbalai Gholamhossein Karimi is one of the zakirin and tazieh-khananan', 'he': 'کربلایی‌ غلامحسین کریمی از ذاکرین وتعزیه خوانان بنام'}</td>
+      <td>Gholamhossein Karimi, one of the famous and popular singers</td>
+      <td>0.698578</td>
+    </tr>
+    <tr>
+      <th>1756654</th>
+      <td>9</td>
+      <td>37</td>
+      <td>{'en': ' He writes: "And in Najarav mountain, he jumps in front of him.', 'he': 'او می‌نویسد: «و در کوهستان نجراو روبه پران می‌شود.'}</td>
+      <td>He writes: "And it is facing the Nagarav mountain.</td>
+      <td>0.646897</td>
+    </tr>
+    <tr>
+      <th>630895</th>
+      <td>28</td>
+      <td>111</td>
+      <td>{'en': 'Evelyn, who has regretted this incident, asks George before his death, who is my company, and George says that the answer has always been in their backyard.', 'he': 'اولین که از این پیش‌آمد پشیمان شده‌است از جرج پیش از مرگ می‌پرسد که کمپانی‌من کیست و جرج می‌گوید که جواب همیشه در حیاط خانهٔ آن‌ها قرار داشته‌است.'}</td>
+      <td>Evelyn, who regrets this incident, asks George before he dies who is my company and George says that the answer has always been in their backyard.</td>
+      <td>0.696108</td>
+    </tr>
+    <tr>
+      <th>1823365</th>
+      <td>8</td>
+      <td>37</td>
+      <td>{'en': ' Overturning of Arbaeen Pilgrims Bus (November 18, 2016)', 'he': ' واژگون شدن اتوبوس زائرین اربعین (۱۸ آبان ۱۳۹۵)'}</td>
+      <td>The bus of the pilgrims of Arbaeen was displaced (November 18, 2015)</td>
+      <td>0.697233</td>
+    </tr>
+    <tr>
+      <th>1299872</th>
+      <td>34</td>
+      <td>125</td>
+      <td>{'en': ' Guar se gholtan (a tool that by rolling it on gold or silver, the upper part of the wall that surrounds the gem sleeps on the gem and causes the gem to be restrained in place', 'he': ' گوار سه غلتان (ابزاری که با غلتاندن آن بر روی طلا یا نقره، قسمت بالای دیواره‌ای که اطراف نگین را گرفته بر روی نگین می‌خوابد و باعث مهار شدن نگین در جای خود می‌شود'}</td>
+      <td>Three-fold digastric (a device that by rolling it on gold or silver, the top part of the wall that surrounds the gem falls on the gem and causes the gem to be restrained in its place.</td>
+      <td>0.634529</td>
+    </tr>
+    <tr>
+      <th>2017488</th>
+      <td>6</td>
+      <td>29</td>
+      <td>{'en': ' Al-Abanah in knowing the names of the treasury books.', 'he': ' الابانة فی معرفة أسماء کتب الخزانة.'}</td>
+      <td>Al-Abanah in knowing the names of the books of the treasury.</td>
+      <td>0.618982</td>
+    </tr>
+    <tr>
+      <th>659627</th>
+      <td>31</td>
+      <td>120</td>
+      <td>{'en': 'Based on these approvals, so far many people have been eligible to receive the badge of sacrifice, which has been awarded to many of them in each period by the then president.', 'he': 'بر اساس این تصویبات تا کنون افراد زیادی واجد شرایط دریافت نشان ایثار شده‌اند که در هر دوره توسط رییس جمهور وقت، این نشان به بسیاری از آنها اعطا شده است.'}</td>
+      <td>According to these images, so far many people have qualified to receive the ransom badge, which has been awarded to many of them in each period by the then president.</td>
+      <td>0.684945</td>
+    </tr>
+    <tr>
+      <th>923033</th>
+      <td>18</td>
+      <td>99</td>
+      <td>{'en': ' The pyramid in the south of Saqqara, Shahbanu Nithshabanu Ipot, the second Shahbanu, Ankhsenpepi, the third Shahbanu, Ankhsenpepi, the fourth Shahbanu, Ochbatan, 150px Marnare II, 2184 B.C.', 'he': 'هرم در جنوب سقاره  شهبانو نیثشهبانو ایپوت دومشهبانو آنخسن‌پپی سومشهبانو آنخسن‌پپی چهارمشهبانو اوچبتن  150px مرنرع دوم  ۲۱۸۴ پ.م.'}</td>
+      <td>Pyramid in the south of Saqqara, Shahbanu Nithshahbanu Ipot, Shahbanu Ankhsenpepi, Shahbanu Ankhsenpepi, Shahbanu Chaharm, Shahbanu Ochbetan 150px Mernara II 2184 B.C.</td>
+      <td>0.678426</td>
+    </tr>
+    <tr>
+      <th>287565</th>
+      <td>11</td>
+      <td>46</td>
+      <td>{'en': ' The Christian cross or crucifix is called a sign like ✞.', 'he': 'صلیب مسیحی یا چلیپای ترسایی به نشانه‌ای مانند ✞ گفته می‌شود.'}</td>
+      <td>The Christian cross or the crucifix of fear is a sign like.</td>
+      <td>0.602431</td>
+    </tr>
+    <tr>
+      <th>189826</th>
+      <td>5</td>
+      <td>25</td>
+      <td>{'en': ' Al-Bayan Fi Al-Akhbar Saheb Al-Zaman', 'he': ' البیان فی الاخبار صاحب الزمان'}</td>
+      <td>Al-Bayan fi al-Akhbar Sahib al-Zaman</td>
+      <td>0.656260</td>
+    </tr>
+    <tr>
+      <th>1558068</th>
+      <td>6</td>
+      <td>36</td>
+      <td>{'en': ' A collection of the most famous songs of Qaiser Aminpour:', 'he': 'گلچینی از معروف‌ترین ترانه‌های قیصر امین‌پور:'}</td>
+      <td>Golchini is one of the most famous songs of Qaiser Aminpour:</td>
+      <td>0.635776</td>
+    </tr>
+    <tr>
+      <th>1692215</th>
+      <td>19</td>
+      <td>73</td>
+      <td>{'en': ' Fenugreek is used as one of the main ingredients in the preparation of a paste or sauce called holba (also holba).', 'he': 'شنبلیله به عنوان یکی از مواد اصلی در تهیه رب یا سسی به نام هولبا (همچنین هولبا) استفاده می‌شود.'}</td>
+      <td>Shanbalileh is used as one of the main ingredients in the preparation of rib or sesame called holba (also holba).</td>
+      <td>0.642594</td>
+    </tr>
+    <tr>
+      <th>1553155</th>
+      <td>11</td>
+      <td>50</td>
+      <td>{'en': ' Al-Arbaun Hadith (forty hadiths on the virtues of the infallible imams and jurisprudential issues)', 'he': ' الأربعون حدیثاً(چهل حدیث در فضائل ائمه معصومین ع و مسائل فقهی)'}</td>
+      <td>Al-Arbaun hadith (forty hadiths in the virtues of the infallible imams and jurisprudential issues)</td>
+      <td>0.676510</td>
+    </tr>
+    <tr>
+      <th>607347</th>
+      <td>21</td>
+      <td>74</td>
+      <td>{'en': 'His love came and took away everything that was under him and left no trace of us until he remained the only one as he is the only one.', 'he': ' عشق او درآمد و هرچه دون او بود برداشت واز ما دون اثر نگذاشت تا یگانه ماند چنان‌که خود یگانه است.'}</td>
+      <td>His love came and whatever was left behind by him did not leave us two to remain as one as he is the one.</td>
+      <td>0.603099</td>
+    </tr>
+    <tr>
+      <th>2056451</th>
+      <td>19</td>
+      <td>82</td>
+      <td>{'en': ' Although employment has been relatively resilient to the shock of sanctions, it has not been able to prevent the fall of real incomes.', 'he': 'با این که اشتغال نسبت به شوک تحریم‌ها تاب آوری نسبی داشته نتوانسته از سقوط درامدهای واقعی جلوگیری کند.'}</td>
+      <td>Although employment has had relative resilience compared to the shock of sanctions, it has not been able to prevent the fall of real dramas.</td>
+      <td>0.696070</td>
+    </tr>
+    <tr>
+      <th>1313849</th>
+      <td>7</td>
+      <td>20</td>
+      <td>{'en': ' And the One who is called by your name', 'he': 'وهدی كه علی ءِ نام گر ءِنت'}</td>
+      <td>And that's why you are so famous</td>
+      <td>0.659416</td>
+    </tr>
+    <tr>
+      <th>2037744</th>
+      <td>4</td>
+      <td>19</td>
+      <td>{'en': ' Sudan is a poor country.', 'he': 'سودان کشور تهی‌دستی است.'}</td>
+      <td>Sudan is a free country.</td>
+      <td>0.593911</td>
+    </tr>
+    <tr>
+      <th>1837709</th>
+      <td>11</td>
+      <td>46</td>
+      <td>{'en': ' Compilation of 22 volumes of the book by the teacher Maragheh of the Young Journalists Club', 'he': ' تالیف 22 جلد کتاب توسط معلم مراغه ای باشگاه خبرنگاران جوان'}</td>
+      <td>The author of 22 volumes of books by Maraghei teacher of the Young Journalists Club</td>
+      <td>0.687668</td>
+    </tr>
+    <tr>
+      <th>1304489</th>
+      <td>14</td>
+      <td>54</td>
+      <td>{'en': ' "Hammer to Fall" is a single by Queen that was released in 1984.', 'he': '«چکش برای افتادن»  تک‌آهنگی از کوئین است که در سال ۱۹۸۴ میلادی منتشر شد.'}</td>
+      <td>"Eye to Fall" is a single by Queen that was released in 1984.</td>
+      <td>0.682932</td>
+    </tr>
+    <tr>
+      <th>1357580</th>
+      <td>24</td>
+      <td>89</td>
+      <td>{'en': 'Tabirah or Tabir Bar Fath al-Bayin is a type of drum kit from the family of percussion musical instruments in which skin is used in its construction.', 'he': 'تبیره یا تبیر بر فتح اول بر وزن کبیره‌ سازی است از خانواده آلات موسیقی کوبه‌ای که در ساختمان آن پوست بکار رفته است.'}</td>
+      <td>Tabira or Tabir on the first conquest is a large-scale instrument from the family of percussion instruments that are used in the building of that skin.</td>
+      <td>0.558183</td>
+    </tr>
+    <tr>
+      <th>841492</th>
+      <td>25</td>
+      <td>95</td>
+      <td>{'en': 'The Red Hat brings Seronaz to his uncle, but Torpedo steals him and Seronaz with the help of the same thieves to destroy the Red Hat.', 'he': 'کلاه قرمزی سروناز را نزد عمو می‌آورد ولی اژدر با کمک همان سارقین برای سر به نیست کردن کلاه قرمزی، او و سروناز را می‌دزدند.'}</td>
+      <td>He brings the red helmet of Saronaz to his uncle, but with the help of the same thieves, they steal him and Saronaz to destroy the red helmet.</td>
+      <td>0.690849</td>
+    </tr>
+    <tr>
+      <th>926935</th>
+      <td>10</td>
+      <td>55</td>
+      <td>{'en': ' Isfahan Innovation and Prosperity Festival Award for Pouyanma Pardaz Studio', 'he': 'جشنواره نوآوری و شکوفایی اصفهان جایزه برای استودیو پویانما پرداز'}</td>
+      <td>Isfahan Innovation and Prosperity Festival Award for Dynamic Studio</td>
+      <td>0.692241</td>
+    </tr>
+    <tr>
+      <th>315614</th>
+      <td>19</td>
+      <td>72</td>
+      <td>{'en': 'This ballad, which was later published in the form of an album with the same name, is popular in the corner of Iraq.', 'he': 'این تصنیف که بعداً در قالب آلبومی به همین نام نیز منتشر شد، در گوشهٔ عراق دستگاه ماهور است.'}</td>
+      <td>This ballad, which was later released in the form of an album of the same name, is a masterpiece in the corner of Iraq.</td>
+      <td>0.688678</td>
+    </tr>
+    <tr>
+      <th>1411065</th>
+      <td>8</td>
+      <td>36</td>
+      <td>{'en': ' Most barrel guns are included in this group.', 'he': 'اغلب تفنگهای دولول در این گروه قرار می‌گیرند.'}</td>
+      <td>Most dolphin rifles fall into this group.</td>
+      <td>0.616644</td>
+    </tr>
+    <tr>
+      <th>1875638</th>
+      <td>16</td>
+      <td>75</td>
+      <td>{'en': 'His research work on "Armenia's land, natural resources and its value" has not been published.', 'he': 'اثر تحقیقی او دربارهٔ «سرزمین ارمنستان، ثروت‌های طبیعی و ارزش سوق‌الجیشی آن» به چاپ نرسیده است.'}</td>
+      <td>His research work about "Armenian land, natural wealth and the value of its Souq al-Jishi" has not been published.</td>
+      <td>0.689161</td>
+    </tr>
+    <tr>
+      <th>1805842</th>
+      <td>25</td>
+      <td>105</td>
+      <td>{'en': ' The guardianship of Astan Quds Razavi is the authority that oversees the shrine of Imam Reza and the endowments of Ali bin Musa al-Reza, the eighth Imam of the Twelver Shiites.', 'he': 'تولیت آستان قدس رضوی مقامی است که سرپرستی حرم امام رضا و موقوفات علی بن موسی الرضا، امام هشتم شیعیان دوازده‌امامی، را بر عهده دارد.'}</td>
+      <td>The guardianship of Astan Quds Razavi is a position that is in charge of the shrine of Imam Reza and the endowments of Ali bin Musa al-Reza, the eighth Imam of the Twelve Imam Shiites.</td>
+      <td>0.694227</td>
+    </tr>
+    <tr>
+      <th>1427006</th>
+      <td>4</td>
+      <td>27</td>
+      <td>{'en': ' 2018-2019 according to the report of Rokna, Farzad.', 'he': '۱۳۸۸–۱۳۹۵۸۸به گزارش رکنا، فرزاد.'}</td>
+      <td>1388-139588, according to Rekna report, Farzad.</td>
+      <td>0.681658</td>
+    </tr>
+    <tr>
+      <th>2157363</th>
+      <td>13</td>
+      <td>46</td>
+      <td>{'en': ' He considered his fasting cooks who came for all the locals.', 'he': 'پزهای ناشتای او را که برای تمام اهل محل می‌آمد، در نظر آورد.'}</td>
+      <td>He considered his breakfast pizza, which was for all the locals.</td>
+      <td>0.642165</td>
+    </tr>
+    <tr>
+      <th>1177347</th>
+      <td>4</td>
+      <td>19</td>
+      <td>{'en': ' Villan Mande: a kind of curse', 'he': ' ویلان مانده: نوعی نفرین'}</td>
+      <td>Villain left: a kind of curse</td>
+      <td>0.644008</td>
+    </tr>
+    <tr>
+      <th>1737926</th>
+      <td>6</td>
+      <td>35</td>
+      <td>{'en': ' Merits of "Rare Land" for "Complex Life"', 'he': ' بایستگی‌های «سرزمین نادر» برای «زندگی پیچیده»'}</td>
+      <td>"Rare Earth" stops for "complex life"</td>
+      <td>0.595479</td>
+    </tr>
+    <tr>
+      <th>336247</th>
+      <td>11</td>
+      <td>42</td>
+      <td>{'en': ' Despite the fact that the tablets are personal, their use and influence is public.', 'he': 'با وجود شخصی بودن الواح، کاربرد و نفوذ شان عمومی است.'}</td>
+      <td>Despite the fact that the tablets are personal, their use and influence are public.</td>
+      <td>0.637933</td>
+    </tr>
+    <tr>
+      <th>2117517</th>
+      <td>11</td>
+      <td>48</td>
+      <td>{'en': ' According to 2002 statistics, 28% of Avars live in the mountains.', 'he': 'بنا بر آمار سال ۲۰۰۲، ۲۸٪ آوارها در کوهستان‌ها زندگی می‌کنند.'}</td>
+      <td>According to the statistics of 2002, 28% of the ruins live in the mountains.</td>
+      <td>0.651544</td>
+    </tr>
+    <tr>
+      <th>1122227</th>
+      <td>15</td>
+      <td>52</td>
+      <td>{'en': ' Dude, see that your poor lover has gone crazy from love', 'he': 'یارب ببین که عاشق بیچاره ات کنون / از عشق بر سرش همی افتاده‌است جنون'}</td>
+      <td>Lord, look, he is in love with your poor man now / Madness has fallen on his head from love</td>
+      <td>0.689631</td>
+    </tr>
+    <tr>
+      <th>1760039</th>
+      <td>30</td>
+      <td>120</td>
+      <td>{'en': ' which is equal to 909 and it was composed by Majnoon named "Sultan Muzaffar" who was "a flower from Genghis Khan's flower" and apparently one of the Uzbek princes across the river.', 'he': 'که با ۹۰۹ برابر می‌شود و آن را مجنون بنام «سلطان مظفّر» که «گلی از گلبن چنگیزخانی» بود و ظاهراً غرضش یکی از شاهزادگان ازبکیه ٔ ماوراءالنهر است منظوم ساخته.'}</td>
+      <td>which is equal to 909 and it was composed by a magician named "Sultan Muzaffar" who was "a clay from Genghis Khan's tulip" and apparently he was the object of one of the princes of Uzbekistan beyond the river.</td>
+      <td>0.633744</td>
+    </tr>
+    <tr>
+      <th>1322069</th>
+      <td>5</td>
+      <td>30</td>
+      <td>{'en': 'Category:Dissolutions of 2022 (AD) in France', 'he': 'رده:انحلال‌های ۲۰۲۲ (میلادی) در فرانسه'}</td>
+      <td>Category:Liquidations of 2022 (AD) in France</td>
+      <td>0.689171</td>
+    </tr>
+    <tr>
+      <th>767848</th>
+      <td>6</td>
+      <td>44</td>
+      <td>{'en': ' Isaev latitude and longitude diameter N18.7° S147.3° E 24.0 km', 'he': 'Isaevعرض جغرافیاییطول جغرافیاییقطرN۱۸.۷° S۱۴۷.۳° E۲۴.۰ کیلومتر'}</td>
+      <td>Isaev, latitude, longitude, latitude, N18.7° S147.3° E24.0 km</td>
+      <td>0.670263</td>
+    </tr>
+    <tr>
+      <th>889905</th>
+      <td>14</td>
+      <td>136</td>
+      <td>{'en': ' Actors Naqshabul Fazl Rajabi Rayan Serlakal Ai Beshart Arina Tajari Mohammad Reza Ali Niashgaig Farahani Sim Adabi Ali Reza Ustad Istareh Hossein Nimehsa Irani Angzale Akram Mishadi Azizi', 'he': 'بازیگراننقشابوالفضل رجبیرایان سرلکال آی بشارتآرینا تجریمحمدرضا علی‌نیاشقایق فراهانینسیم ادبیعلیرضا استادیستاره حسینیمهسا ایرانیانغزاله اکرمیشادی عزیزی'}</td>
+      <td>Actors: Naqshabulfazl Rajibiran, Major General Ai Basharat, Arina Tajrim, Ahmadreza Ali, Niashqaiq Farahanin, Alireza, Literary Sim, Hosseinimehsa, Iranian, Ghazaleh, Akramishadi Azizi</td>
+      <td>0.661719</td>
+    </tr>
+    <tr>
+      <th>1916180</th>
+      <td>11</td>
+      <td>38</td>
+      <td>{'en': ' On December 11, 2015, he obtained the authority of the Shia Taqlid.', 'he': 'او در ۱۱ آذر ۱۳۹۴، به مرجعیت تقلید شیعه دست یافت.'}</td>
+      <td>On December 11, 1394, he became the authority of Shia imitation.</td>
+      <td>0.621100</td>
+    </tr>
+    <tr>
+      <th>1098590</th>
+      <td>4</td>
+      <td>14</td>
+      <td>{'en': ' Reach out to my son."', 'he': 'به داد پسرم برسید».'}</td>
+      <td>Give my son".</td>
+      <td>0.637838</td>
+    </tr>
+    <tr>
+      <th>78949</th>
+      <td>4</td>
+      <td>16</td>
+      <td>{'en': ' freestyle swimming (breaststroke)', 'he': ' شنای آزاد (کرال سینه)'}</td>
+      <td>Free swimming (breast crown)</td>
+      <td>0.608854</td>
+    </tr>
+    <tr>
+      <th>189841</th>
+      <td>9</td>
+      <td>32</td>
+      <td>{'en': ' Mazil al-Labs about the miracle of the moon's split and the sun's rays', 'he': ' مزیل اللبس عن معجزتی شق القمر و رد الشمس'}</td>
+      <td>Mizil al-Labs about the miracle of the moon and the sun's rays</td>
+      <td>0.658809</td>
+    </tr>
+    <tr>
+      <th>2161520</th>
+      <td>6</td>
+      <td>25</td>
+      <td>{'en': ' Without hesitation, I tear the house apart...', 'he': 'بی‌تامل خانه بر فرقش فرو می‌آورم…'}</td>
+      <td>I will destroy the house without care...</td>
+      <td>0.685945</td>
+    </tr>
+    <tr>
+      <th>710041</th>
+      <td>5</td>
+      <td>33</td>
+      <td>{'en': ' Shahada Sorkheh Overnight Clinic Pharmacy', 'he': ' داروخانه درمانگاه شبانه‌روزی شهدا سرخه'}</td>
+      <td>Shahada Sorkheh overnight clinic pharmacy</td>
+      <td>0.657273</td>
+    </tr>
+    <tr>
+      <th>678127</th>
+      <td>4</td>
+      <td>17</td>
+      <td>{'en': ' Range: about 50 km', 'he': ' بُرد: حدود ۵۰ کیلومتر'}</td>
+      <td>Board: about 50 km</td>
+      <td>0.637973</td>
+    </tr>
+    <tr>
+      <th>651414</th>
+      <td>27</td>
+      <td>112</td>
+      <td>{'en': ' In another part of the same book, Shermer describes the extensive research that he and his colleague Frank Salovey have conducted on Americans.', 'he': 'شرمر در بخش دیگری از همین کتاب، پژوهش گسترده‌ای را شرح می‌دهد که خود او و همکارش فرانک سالووی به صورت کتره‌ای بر روی آمریکاییان انجام داده‌اند.'}</td>
+      <td>In another part of the same book, Shermer describes the extensive research that he and his colleague Frank Salvi have done as a trickster on Americans.</td>
+      <td>0.652703</td>
+    </tr>
+    <tr>
+      <th>635485</th>
+      <td>7</td>
+      <td>27</td>
+      <td>{'en': ' Muslim rise up, become a party of resurrection', 'he': ' مسلمان به پا خیز، حزب شده رستاخیز'}</td>
+      <td>Standing Muslim, Rastakhiz Party</td>
+      <td>0.550636</td>
+    </tr>
+    <tr>
+      <th>137067</th>
+      <td>5</td>
+      <td>26</td>
+      <td>{'en': ' Thiamine deficiency causes baldness.', 'he': ' کمبود تیامین موجب بری‌بری می‌شود.'}</td>
+      <td>Thiamine deficiency causes bariatric acid.</td>
+      <td>0.611726</td>
+    </tr>
+    <tr>
+      <th>1470321</th>
+      <td>27</td>
+      <td>122</td>
+      <td>{'en': ' The gathering ceremony is said to be the group participation of Sistan men for dredging the bed of Hamon Lake, which is the biggest crystallization of solidarity and shared efforts in this region.', 'he': 'مراسم حشر کردن به مشارکت گروهی مردان سیستان برای لایروبی بستر دریاچه هامون گفته می‌شود که خود بزرگ‌ترین تبلور همبستگی و اشتراک مساعی در این خطه می‌باشد.'}</td>
+      <td>The ceremony of weaving is called the participation of a group of Sistan men for the layrobi of the bed of Hamon Lake, which is the biggest crystallization of solidarity and joint effort in this region.</td>
+      <td>0.684143</td>
+    </tr>
+    <tr>
+      <th>748610</th>
+      <td>20</td>
+      <td>89</td>
+      <td>{'en': ' This incident caused Eghtari to go to the Khaksarieh monastery in Tehran and accompany Motahar Alishah on his travels.', 'he': 'این اتفاق سبب رفت‌وآمد مداوم اقتداری به خانقاه خاکساریه در تهران و نیز همراهی‌اش با مطهرعلیشاه در سفرهای او شد.'}</td>
+      <td>This incident caused the authority to travel continuously to Khaksariya monastery in Tehran and also accompany him with Motahar al-Isha on his travels.</td>
+      <td>0.695935</td>
+    </tr>
+    <tr>
+      <th>10409</th>
+      <td>5</td>
+      <td>20</td>
+      <td>{'en': ' It has been drawn in Safavid Iran.', 'he': 'در ایران صفوی رسم شده‌است.'}</td>
+      <td>Safavidism is practiced in Iran.</td>
+      <td>0.646345</td>
+    </tr>
+    <tr>
+      <th>1664086</th>
+      <td>7</td>
+      <td>36</td>
+      <td>{'en': ' South end: Shariati St., Zarabkhaneh three ways', 'he': ' پایان جنوبی: خیابان شریعتی، سه راه ضرابخانه'}</td>
+      <td>South end: Shariati St., three roads of the mint</td>
+      <td>0.612472</td>
+    </tr>
+    <tr>
+      <th>1614198</th>
+      <td>5</td>
+      <td>26</td>
+      <td>{'en': ' Neshkino, Nekuno b time ball', 'he': 'نێشکینۆ، نێکوونۆ ب تۆپا زه‌مانی'}</td>
+      <td>Neshkino, Nekono B Topah Zamani</td>
+      <td>0.654169</td>
+    </tr>
+    <tr>
+      <th>1212650</th>
+      <td>12</td>
+      <td>37</td>
+      <td>{'en': ' Sh) and was buried in the cemetery of Ibn Baboyeh in the city of Ray.', 'he': 'ش) بود و در گورستان ابن بابویه  شهر ری دفن شده است.'}</td>
+      <td>n) and is buried in Ibn Babouyeh cemetery in Ray city.</td>
+      <td>0.675494</td>
+    </tr>
+    <tr>
+      <th>448378</th>
+      <td>4</td>
+      <td>18</td>
+      <td>{'en': ' Amin Razavi Parviz Medicine', 'he': '  امین رضوی  پرویز پزشکی'}</td>
+      <td>Amin Razavi Parviz Med</td>
+      <td>0.642780</td>
+    </tr>
+    <tr>
+      <th>2088605</th>
+      <td>4</td>
+      <td>16</td>
+      <td>{'en': ' Malraux's group way.', 'he': 'راه گروهی مالرو است.'}</td>
+      <td>The group road is Malro.</td>
+      <td>0.695956</td>
+    </tr>
+    <tr>
+      <th>1369297</th>
+      <td>7</td>
+      <td>30</td>
+      <td>{'en': ' Some write nested and some with spaces.', 'he': 'برخی تودرتو می‌نویسند و برخی با فاصله.'}</td>
+      <td>Some write Todetto and some with distance.</td>
+      <td>0.612600</td>
+    </tr>
+    <tr>
+      <th>385886</th>
+      <td>21</td>
+      <td>68</td>
+      <td>{'en': 'That makes the Lancet's estimate of excess deaths since the invasion too high, he said.', 'he': 'او گفت که این باعث می‌شود تخمین لنست از مرگ و میر بیش از حد از زمان تهاجم بسیار بالا باشد.'}</td>
+      <td>This makes Lent's estimate of over-fatal since the invasion too high, he said.</td>
+      <td>0.613691</td>
+    </tr>
+    <tr>
+      <th>996310</th>
+      <td>8</td>
+      <td>34</td>
+      <td>{'en': ' 10- Magazine publication (small and medium enterprises) 2015-2015', 'he': '۱۰- چاپ مجله (تشبثات کوچوک و متوسط) ۱۳۹۴–۱۳۹۵'}</td>
+      <td>10- Journal edition (Kochuk and Medium Studies) 1394-1395</td>
+      <td>0.684165</td>
+    </tr>
+    <tr>
+      <th>33901</th>
+      <td>18</td>
+      <td>58</td>
+      <td>{'en': 'The severity of the violence of one of Mobad's followers, named Mehr Shapour, was such that it led to his escape.', 'he': 'شدت خشونت یکی از موبدان موبد به نام مهر شاپور به حدی بود که منجر به فرار شد.'}</td>
+      <td>The intensity of the violence of one of Mobad's mobd named Mehr Shapur was so great that it led to his escape.</td>
+      <td>0.686917</td>
+    </tr>
+    <tr>
+      <th>2041764</th>
+      <td>4</td>
+      <td>20</td>
+      <td>{'en': ' You ate milled secondary school', 'he': 'مکتب متوسطه آسیاب خوردی'}</td>
+      <td>Milly Khodi High School</td>
+      <td>0.695081</td>
+    </tr>
+    <tr>
+      <th>320686</th>
+      <td>7</td>
+      <td>25</td>
+      <td>{'en': ' It is good to ward off demons and goblins.', 'he': 'برای دوری شیاطین و اجنه خوب است.'}</td>
+      <td>It is good for avoiding demons and agnostics.</td>
+      <td>0.659241</td>
+    </tr>
+    <tr>
+      <th>1263952</th>
+      <td>13</td>
+      <td>56</td>
+      <td>{'en': ' Maulvi's works: Dineh (Yesterday), Khazine (Treasury and bathroom without shower), Chineh (Chicken's seed).', 'he': ' آثار مولوی: دینَه (دیروز)، خزینه (خزانه و حمام بدون دوش)، چینه (دانه مرغان).'}</td>
+      <td>Maulvi's works: Dinah (Yesterday), Khazanah (Treasure and Bath Without Shower), Chineh (Foxes).</td>
+      <td>0.678172</td>
+    </tr>
+    <tr>
+      <th>439784</th>
+      <td>4</td>
+      <td>18</td>
+      <td>{'en': ' Fragments in the Afsharian era', 'he': ' تکه‌ها در عصر افشاریان'}</td>
+      <td>Pieces in the Afsharian era</td>
+      <td>0.626958</td>
+    </tr>
+    <tr>
+      <th>1245589</th>
+      <td>11</td>
+      <td>45</td>
+      <td>{'en': ' "Father" dies in a fight with the owner of the house who is always drunk...', 'he': '«پدر» در یک درگیری با صاحب خانهٔ دائم‌الخمر سبب مرگش می‌شود...'}</td>
+      <td>"Father" causes his death in a conflict with the owner of the permanent house of Al-Khor...</td>
+      <td>0.666096</td>
+    </tr>
+    <tr>
+      <th>716489</th>
+      <td>12</td>
+      <td>56</td>
+      <td>{'en': ' Finding proof of Irving's anti-activities was the first and most important mission of the two.', 'he': 'یافتن مدرک ضد فعالیت‌های ایروینگ نخستین و مهم‌ترین ماًموریت آن دو بود.'}</td>
+      <td>Finding evidence against Irving's activities was the first and most important death of the two of us.</td>
+      <td>0.645006</td>
+    </tr>
+    <tr>
+      <th>2160137</th>
+      <td>11</td>
+      <td>54</td>
+      <td>{'en': ' Moin's son, Moin's mother, said about the age of his birthplace and his tomb:', 'he': 'مهدخت معین فرزند معین دربارهٔ سنخیت زادگاه با آرامگاه وی گفته‌است:'}</td>
+      <td>Moin's son Ma'in's mausoleum said about the birthplace of Senkit with his tomb:</td>
+      <td>0.597178</td>
+    </tr>
+    <tr>
+      <th>40595</th>
+      <td>5</td>
+      <td>17</td>
+      <td>{'en': ' This head has 2 margins.', 'he': 'این سردر ۲ حاشیه دارد.'}</td>
+      <td>This head has 2 edges.</td>
+      <td>0.596663</td>
+    </tr>
+    <tr>
+      <th>1699907</th>
+      <td>6</td>
+      <td>29</td>
+      <td>{'en': 'Category: Hungarian amputees', 'he': 'رده:افراد دچار قطع عضو اهل مجارستان'}</td>
+      <td>Category: People with amputation from Hungary</td>
+      <td>0.687799</td>
+    </tr>
+    <tr>
+      <th>1565798</th>
+      <td>4</td>
+      <td>17</td>
+      <td>{'en': ' "Dardashna" published by Hanar 1362', 'he': ' «دردآشنا» نشر هنر ۱۳۶۲'}</td>
+      <td>"Pain" published by Art 1362</td>
+      <td>0.651944</td>
+    </tr>
+    <tr>
+      <th>2252891</th>
+      <td>17</td>
+      <td>69</td>
+      <td>{'en': ' The weekly Ma'ariv is recited on Shabbat night, ending with the Vehi Nu'am Veiten Lekha and Havdalah.', 'he': 'معاریو هفتگی شب شبات خوانده می‌شود که با ویهی نوئام وییتن لخا و هاودالا به پایان می‌رسد.'}</td>
+      <td>The weekly Maariv is read on the night of Shabbat, which ends with the verse of Vieten Lekha and Hawadala.</td>
+      <td>0.689702</td>
+    </tr>
+    <tr>
+      <th>1365033</th>
+      <td>27</td>
+      <td>105</td>
+      <td>{'en': 'This hole is called "pupil" on the principle that when two people are in front of each other, the image of each person is seen in the middle of the black eye of the other person.', 'he': 'این سوراخ روی این اصل «مردمک» نامیده شده‌است که دو نفر که در مقابل یکدیگر واقع شوند تصویر هرکدام در وسط سیاهی چشم طرف مقابل دیده می‌شود.'}</td>
+      <td>This hole is called "man" on this principle, where two people standing in front of each other, the image of each one is seen in the middle of the black of the other's eye.</td>
+      <td>0.649527</td>
+    </tr>
+    <tr>
+      <th>1648798</th>
+      <td>9</td>
+      <td>34</td>
+      <td>{'en': ' This tablet contains other names of Marduk.', 'he': 'این لوح در بر گیرنده سایر نامهای مردوک است.'}</td>
+      <td>This tablet contains the recipient of other names of Marduk.</td>
+      <td>0.671471</td>
+    </tr>
+    <tr>
+      <th>774772</th>
+      <td>13</td>
+      <td>55</td>
+      <td>{'en': ' Finally, at the instigation of the stepmother, Fereshte's father cut off Fereshte's head at night.', 'he': 'سرانجام پدر فرشته به تحریک نامادری، شبانگاه سر فرشته را تنش جدا کرد.'}</td>
+      <td>Finally, at the instigation of the stepmother, the angel's father separated the angel's head from tension at night.</td>
+      <td>0.695353</td>
+    </tr>
+    <tr>
+      <th>2064877</th>
+      <td>20</td>
+      <td>83</td>
+      <td>{'en': ' The entrance doors of the metro from the Khayyam street side, which are decorated with military tools and equipment, were also casted in Qorkhaneh.', 'he': 'درهای ورودی مترو از سمت خیابان خیام که مزین به آلات و ادوات نظامی هستند نیز در قورخانه ریخته‌گری شده‌اند.'}</td>
+      <td>The entrance doors of the metro on the side of Khayyam Street, which are decorated with military equipment and tools, are also cast in the garrison.</td>
+      <td>0.676140</td>
+    </tr>
+    <tr>
+      <th>684553</th>
+      <td>14</td>
+      <td>56</td>
+      <td>{'en': ' Goats and goats are the ancestors of domestic goats and can mate with them.', 'he': 'کل‌ها و بزها از اجداد بزهای اهلی هستند و می‌توانند با آن‌ها جفت‌گیری کنند.'}</td>
+      <td>Goats and goats are the ancestors of domestic goats and can mate with them.</td>
+      <td>0.699099</td>
+    </tr>
+    <tr>
+      <th>423748</th>
+      <td>7</td>
+      <td>27</td>
+      <td>{'en': ' 15:00: The number of dead reached 29.', 'he': 'ساعت ۱۵:۰۰: تعداد فوتی‌ها به ۲۹ رسید.'}</td>
+      <td>15:00: The number of foots reached 29.</td>
+      <td>0.659398</td>
+    </tr>
+    <tr>
+      <th>376833</th>
+      <td>15</td>
+      <td>61</td>
+      <td>{'en': 'To protect the hoof in various conditions, farriers insert a shoe into the hoof of horses.', 'he': 'برای حفاظت از سم در شرایط گوناگون، نعل‌بندان به درون سم اسبان نعل فرو می‌برند.'}</td>
+      <td>To protect the poison in various conditions, the hoodlums plunge into the poison of the hoodlums.</td>
+      <td>0.583875</td>
+    </tr>
+    <tr>
+      <th>1903387</th>
+      <td>4</td>
+      <td>35</td>
+      <td>{'en': ' Category: historical caravanserais of Dashtestan city', 'he': 'رده:کاروان‌سراهای تاریخی شهرستان دشتستان'}</td>
+      <td>Category: Historical caravanserais of Dashtestan city</td>
+      <td>0.652538</td>
+    </tr>
+    <tr>
+      <th>629679</th>
+      <td>18</td>
+      <td>90</td>
+      <td>{'en': ' Biosensor based on direct detection of antigen (antigen): the receptor reacting with the analyte is directly detected by the sensor.', 'he': ' حسگر زیستی با اساس شناسایی مستقیم پادگن (آنتی‌ژن): که واکنش پذیرنده با آنالیت مستقیماً توسط حسگر شناسایی می‌گردد.'}</td>
+      <td>Biosensor based on antigen (antigen) direct detection: which is detected directly by the sensor.</td>
+      <td>0.667172</td>
+    </tr>
+    <tr>
+      <th>131060</th>
+      <td>21</td>
+      <td>86</td>
+      <td>{'en': ' 1393: "Vasukht style in Persian poetry: leading and leading, Vausukht is magnificent, not wild" in Farhangistan special issue of Subcontinent.', 'he': ' ۱۳۹۳: «سبک واسوخت در شعر فارسی: پیشرو و سرآمد واسوخت محتشم است نه وحشی» در نامهٔ فرهنگستان ویژه نامهٔ شبه قاره.'}</td>
+      <td>1393: "The style of the sword in Persian poetry: the leader and the leader of the sword is the most important, not the wildest" in the letter of the special issue of the subcontinent academy.</td>
+      <td>0.631225</td>
+    </tr>
+    <tr>
+      <th>872265</th>
+      <td>20</td>
+      <td>72</td>
+      <td>{'en': ' Creators are from the same word Afarin and it means good prayer and praise against curse which is bad prayer.', 'he': 'آفرینگان‌ها از همان واژه آفرین و به مانای دعای نیک و ستایش است در برابر نفرین که دعای بد است.'}</td>
+      <td>Creatures are from the same word as creator and it means good prayer and praise against curses, which is a bad prayer.</td>
+      <td>0.678947</td>
+    </tr>
+    <tr>
+      <th>40400</th>
+      <td>27</td>
+      <td>109</td>
+      <td>{'en': ' The proverb "Bashi Bashi Abitet Gerashi" means "Don't face the wind because you will die and they will bury you in Gerashi" actually refers to the historical grave-vessels of the region.', 'he': 'ضرب‌المثل «باشی باشی ابیتت گراشی» به معنی «جلوی باد نرو که می‌میری و تو را در گراشی دفن می‌کنند» در واقع به گور-خمره‌های تاریخی منطقه اشاره دارد.'}</td>
+      <td>The proverb "Bashibashi Abit Gerashi" means "the wind will blow when you die and you will be buried in Gerashi" actually refers to the historical tombs of the region.</td>
+      <td>0.663713</td>
+    </tr>
+    <tr>
+      <th>719208</th>
+      <td>13</td>
+      <td>63</td>
+      <td>{'en': ' Many beautiful and diverse works from the past have been left in this area.', 'he': 'آثارهای بسیار زیبایی وگوناگونی از دوران گذشته در این منطقه پا برجا مانده‌است.'}</td>
+      <td>Very beautiful works of Vegonagoni have been left in this area since the past.</td>
+      <td>0.663024</td>
+    </tr>
+    <tr>
+      <th>2194926</th>
+      <td>15</td>
+      <td>74</td>
+      <td>{'en': ' Some of its families include Heydari Fatahi, Alle Veisi Ramezani, Naderi Kamri, Mahmoudi, Mirzaei, Abdi Qadri.', 'he': 'بعضی خانواده‌های آن شامل حیدری فتاحی همه ویسی رمضانی نادری کمری محمودی میرزایی عبدی قادری'}</td>
+      <td>Some of its families include Heydari Fatahi, all of whom are Vicky Ramezani Naderi, Kamri Mahmoudi Mirzaei Abdi Qadri</td>
+      <td>0.689552</td>
+    </tr>
+    <tr>
+      <th>1475981</th>
+      <td>14</td>
+      <td>52</td>
+      <td>{'en': ' Ibn Idris did not act on single news and considered continuous news as the criterion for action.', 'he': 'ابن ادریس به خبر واحد عمل نمی‌کرد و خبر متواتر را ملاک عمل می‌دانست.'}</td>
+      <td>Ibn Idris did not act on the news of the unit and considered the continuous news as the criterion of action.</td>
+      <td>0.689399</td>
+    </tr>
+    <tr>
+      <th>1339357</th>
+      <td>5</td>
+      <td>16</td>
+      <td>{'en': ' Khunkha, I am at the door!', 'he': ' خونخا مَنَم تو در رو!'}</td>
+      <td>I'm bloody in front of you!</td>
+      <td>0.585070</td>
+    </tr>
+    <tr>
+      <th>1361132</th>
+      <td>13</td>
+      <td>46</td>
+      <td>{'en': ' On the day of Ashura, Shaha became rare on the banks of Shat Euphrates because of Yahsin's ablution', 'he': 'روز عاشورا شها اندر لب شط فرات نایاب شد ز بهر وضویت یاحسین'}</td>
+      <td>The day of Ashura fell on the edge of the Euphrates, due to the purity of Yahousayn</td>
+      <td>0.599519</td>
+    </tr>
+    <tr>
+      <th>479237</th>
+      <td>7</td>
+      <td>24</td>
+      <td>{'en': ' A story of Ibn Sirin's shame and modesty', 'he': ' داستانی از شرم و حیا ابن سیرین'}</td>
+      <td>A story of Ibn Sirin's shame and shame</td>
+      <td>0.676397</td>
+    </tr>
+    <tr>
+      <th>656138</th>
+      <td>12</td>
+      <td>58</td>
+      <td>{'en': ' This stadium is a reminder of many bitter and sweet events for Nasaji fans.', 'he': 'این ورزشگاه برای هواداران نساجی یادآور اتفاقات تلخ و شیرین بسیاری است.'}</td>
+      <td>This stadium is a reminder of many bitter and sweet events for textile fans.</td>
+      <td>0.664755</td>
+    </tr>
+    <tr>
+      <th>1897120</th>
+      <td>30</td>
+      <td>111</td>
+      <td>{'en': ' Qichek is a soprano instrument that can play both solo and accompaniment, but the other two types (alto and bass) are mostly used for orchestra accompaniment.', 'he': 'قیچک سوپرانو سازی است که قابلیت تکنوازی و همنوازی هر دو را حائز است ولی دو نوع دیگر (آلتو و باس) بیشتر به منظور همنوازی در ارکستر به کار می‌رود.'}</td>
+      <td>The chiseled is a soprano composition that has the ability to both solo and harmony, but the other two types (alto and bass) are mostly used for harmony in the orchestra.</td>
+      <td>0.645991</td>
+    </tr>
+    <tr>
+      <th>2138712</th>
+      <td>6</td>
+      <td>32</td>
+      <td>{'en': ' Fingal's Cave Overture or Hebrides Overture', 'he': ' اوورتور غار فینگال یا اوورتور هبریدها'}</td>
+      <td>Fingal cave overturn or Hebrides overturn</td>
+      <td>0.565076</td>
+    </tr>
+    <tr>
+      <th>1534382</th>
+      <td>7</td>
+      <td>32</td>
+      <td>{'en': ' Cheikh Chaman Sairine, Madhosh Ale Sarvi, Semni//', 'he': 'چیخ چمن سئیرینه، مدهوش ائله سروی، سمنی//'}</td>
+      <td>Cheek grass of Sirine, Madhoosh Vela Sarvi, Samni//</td>
+      <td>0.561032</td>
+    </tr>
+    <tr>
+      <th>966445</th>
+      <td>10</td>
+      <td>41</td>
+      <td>{'en': ' The following verses are among the famous families of Akhwan.', 'he': 'از جمله مشاهیر خانواده های اخوان ابیات زیر میباشد .'}</td>
+      <td>Among the famous families of the brothers are the following verses.</td>
+      <td>0.678777</td>
+    </tr>
+    <tr>
+      <th>25888</th>
+      <td>9</td>
+      <td>35</td>
+      <td>{'en': ' Again, among marketers, there is no such good cuisine.', 'he': 'باز در بین بازاریان، به خوبی آن مطبوخی نیست.'}</td>
+      <td>Again, among the marketers, it is not well cooked.</td>
+      <td>0.623422</td>
+    </tr>
+    <tr>
+      <th>1626870</th>
+      <td>11</td>
+      <td>47</td>
+      <td>{'en': 'Tsukuri: Being in a throwing or grounding position (after Kozushi)', 'he': ' تسوکوری: قرارگیری در وضعیت پرتاب یا خاک کردن (بعد از کوزوشی)'}</td>
+      <td>Tsukuri: Placing in a throwaway or dirt position (after Kozushi)</td>
+      <td>0.693757</td>
+    </tr>
+    <tr>
+      <th>1369062</th>
+      <td>10</td>
+      <td>44</td>
+      <td>{'en': ' Formation of the Doumtraz Sokhon National Front - Irfan Publishing House - 2015 - Adib Broumand', 'he': ' تشکیل جبهه ملی دومطراز سخن -نشر عرفان -۱۳۸۵ -ادیب برومند'}</td>
+      <td>Formation of the second-level national front of Sokhon - Irfan publication - 2005 - Adib Broumand</td>
+      <td>0.674865</td>
+    </tr>
+    <tr>
+      <th>1177295</th>
+      <td>4</td>
+      <td>24</td>
+      <td>{'en': ' and the flowers of Alvandfaizi, Abbas.', 'he': 'و گلپونه‌های الوندفیضی، عباس.'}</td>
+      <td>and Alvandfaizi's Gholpounes, Abbas.</td>
+      <td>0.652338</td>
+    </tr>
+    <tr>
+      <th>201849</th>
+      <td>5</td>
+      <td>35</td>
+      <td>{'en': ' Category:Foundations of 2020 (AD) in Italy', 'he': 'رده:بنیان‌گذاری‌های ۲۰۲۰ (میلادی) در ایتالیا'}</td>
+      <td>Category:Foundations of 2020 (AD) in Italy</td>
+      <td>0.671567</td>
+    </tr>
+    <tr>
+      <th>1692222</th>
+      <td>14</td>
+      <td>67</td>
+      <td>{'en': '(cold raisin drink), and diba (pumpkin nectar) are examples of popular Yemeni drinks.', 'he': '(نوشیدنی کشمش سرد)، و دیبا (شهد کدو حلوایی) نمونه‌هایی از نوشیدنی‌های محبوب یمنی هستند.'}</td>
+      <td>(Cold raisins drink), and Diba (Codato halway martyr) are examples of popular Yemeni drinks.</td>
+      <td>0.669349</td>
+    </tr>
+    <tr>
+      <th>1107760</th>
+      <td>19</td>
+      <td>90</td>
+      <td>{'en': ' Also, Brahni with the pseudonym "Burhan Rezaei" has translated books by Leon Trotsky, a member of the Soviet Communist Party.', 'he': 'همچنین براهنی با نام مستعار «برهان رضایی» کتاب‌هایی از لئون تروتسکی از اعضای حزب کمونیست شوروی را ترجمه کرده‌است.'}</td>
+      <td>Also, a proof with the pseudonym "Behran Rezaei" has translated books by Leon Trotsky, a member of the Soviet Communist Party.</td>
+      <td>0.663850</td>
+    </tr>
+    <tr>
+      <th>982139</th>
+      <td>18</td>
+      <td>78</td>
+      <td>{'en': ' A floating angel is also above Shapur's head giving Dihim Shahidiham Shahi, a crown that is reserved for kings.', 'he': 'فرشتهٔ شناوری نیز در بالای سر شاپور در حال دادن دیهیم شاهیدیهم شاهی، تاجی که مخصوص پادشاهان است.'}</td>
+      <td>The floating angel is also above Shapur's head giving him a royal testimony, a crown that is for kings.</td>
+      <td>0.697621</td>
+    </tr>
+  </tbody>
+</table>
