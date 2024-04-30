@@ -26,6 +26,10 @@ def count_lang_chars(string, lang):
     return count
 
 
+def count_words(cell_content):
+    words = cell_content.split()
+    return len(words)
+
 def filter_sentences_df(df, lang, thr_lang_chars = 0.70):
     """
 
@@ -39,14 +43,15 @@ def filter_sentences_df(df, lang, thr_lang_chars = 0.70):
 
     """
     # filter the length of the sentences (between 4-45 words)
-    df['word_count'] = df['HE_sentences'].apply(lambda x: count_words(x))
+    df = df.dropna(subset=['HE_sentences'])
+    df['word_count'] = df.HE_sentences.apply(lambda x: count_words(x))
     len_filtered_df = df.query('word_count > 3 and word_count < 45').copy()
 
-    # filter the df to only hebrew sentences
+    # filter the df to only lang sentences
     print(len(len_filtered_df))
     len_filtered_df['lang_cnt'] = len_filtered_df['HE_sentences'].apply(lambda x: count_lang_chars(x,lang))
     He_filtered_df = len_filtered_df[len_filtered_df.lang_cnt > thr_lang_chars * len_filtered_df['HE_sentences'].str.len()]
-   
+    print(len(He_filtered_df))
     #len_filtered_df['sen_lang'] = len_filtered_df['HE_sentences'].apply(lambda x: detect_lang(x))
     #He_filtered_df = len_filtered_df.query(f"sen_lang == '{lang}'")
 
@@ -54,9 +59,6 @@ def filter_sentences_df(df, lang, thr_lang_chars = 0.70):
     return He_filtered_df
 
 
-def count_words(cell_content):
-    words = cell_content.split()
-    return len(words)
 
 
 def detect_lang(cell_content):
