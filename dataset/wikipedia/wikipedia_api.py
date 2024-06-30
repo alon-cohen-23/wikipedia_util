@@ -60,10 +60,13 @@ def get_pages_and_subcategories(top_categories, max_depth=6, language='he'):
 
 
 # Example usage:
-lang = 'fa' # Select lang and edit lang --> categories dict 
-top_categories = {'ar': ["تصنيف:عسكرية", "تصنيف:نزاع_عنيف", "تصنيف:نزاع", "تصنيف:الشرق_الأوسط"],
-                  'he': ["קטגוריה:צבא", "קטגוריה:לחימה", "קטגוריה:סכסוכים", "קטגוריה:המזרח_התיכון"],
-                  'fa': ["رده:نظامی‌گری", "رده:مبارزه", "رده:ناسازگاری", "رده:خاورمیانه"]
+lang = 'he' # Select lang and edit lang --> categories dict 
+# TODO: Read relevant_cats_fa.parquet - save wikipediaapi traversal of already saved in subcategories.parquet
+
+# TODO: Generate pages / sents of the new categories in ar, fa - only added cats, but still has to generate
+top_categories = {'ar': ["تصنيف:عسكرية", "تصنيف:نزاع_عنيف", "تصنيف:نزاع", "تصنيف:الشرق_الأوسط", "تصنيف:علوم_وتكنولوجيا", "تصنيف:صناعة"],
+                  'he': ["קטגוריה:תעשייה","קטגוריה:מדע", "קטגוריה:צבא", "קטגוריה:לחימה", "קטגוריה:סכסוכים", "קטגוריה:המזרח_התיכון"],
+                  'fa': ["رده:نظامی‌گری", "رده:مبارزه", "رده:ناسازگاری", "رده:خاورمیانه", "رده:علوم", "رده:صنعت"]
                   }
 # top_categories =
 pages, subcategories = get_pages_and_subcategories(top_categories[lang], language=lang)

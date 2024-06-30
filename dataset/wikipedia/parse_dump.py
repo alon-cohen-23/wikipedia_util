@@ -7,10 +7,11 @@ Created on Thu Sep  7 17:05:05 2023
 
 import re
 from pathlib import Path
+import pandas as pd
 import mwxml
 import mwparserfromhell
 from nltk.tokenize import sent_tokenize
-import pandas as pd
+from eng_utils.common.common_util import read_df_folder
 from dataset.df_process import filter_sentences_df
 
 RE_BOLD = re.compile(r"'''(.*?)'''", re.MULTILINE | re.IGNORECASE)
@@ -87,7 +88,7 @@ def main(lang, dump_gen, pages_df_path):
                 data_frames.append(pd.DataFrame({'title': page.title, 'HE_sentences': page_sentences}))
 
         except:
-            print('failed to load {pag.title}')
+            print(f'failed to load {page.title}')
 
         if index > 0 and index % 10000 == 0:
             print(f'Extracted sentences from {index} pages')
@@ -139,15 +140,21 @@ def extract_page_wikicode(page):
 if __name__ == '__main__':
     """
     Input: wikipedia dump + pages.parquet - list of relevant pages --> Output: Sentences from the relevant pages
-    """
-    lang='fa' # Set language code here. Download corresponding dump from 
+    """ 
+    lang = 'he' # 'fa' # Set language code here. Download corresponding dump from 
     dump_path = fr'wikipedia_dumps/{lang}wiki-latest-pages-articles.xml.bz2'
+    # If added more data --> filter out sentences already translated, to save google translate time 
+      # Set to None to disable filtering
+    FILTER_ALREADY_TRANSLATED_FOLDER = f'translated/{lang}'
     paths = [dump_path]
     dump_gen = mwxml.map(process_dump, paths)
     pages_df_path=f'categories_pages/{lang}/pages.parquet' # Input: the pages df of all pages under categories (recursive - see wikipedia-api)
     df = main(lang, dump_gen, pages_df_path)
     p_out=Path(f'relevant_categories_sentences/{lang}')
     p_out.mkdir(parents=True, exist_ok=True)
+    if not FILTER_ALREADY_TRANSLATED_FOLDER is None:
+        df_translated = read_df_folder(FILTER_ALREADY_TRANSLATED_FOLDER) 
+        df = df[~df['HE_sentences'].isin(df_translated['HE_sentences'])]
     df.to_parquet(p_out / f'relevant_categories_sentences_{lang}.parquet')
 
     

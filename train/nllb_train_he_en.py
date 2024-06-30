@@ -20,19 +20,19 @@ import evaluate
 model_checkpoint = "facebook/nllb-200-distilled-600M" # 'output_models/nllb-200-distilled-1.3B_heb_eng_wiki_40000/checkpoint-80448/' # "facebook/nllb-200-distilled-1.3B" # "facebook/m2m100_418M" # "facebook/nllb-200-distilled-600M"
 
 # Language codes: https://github.com/facebookresearch/flores/blob/main/flores200/README.md#languages-in-flores-200    
-src_lang = 'pes_Arab' # "arb_Arab" # "heb_Hebr" # "pes_Arab"
+src_lang = 'heb_Hebr' # "arb_Arab" # "heb_Hebr" # "pes_Arab"
 tgt_lang= 'eng_Latn'
 
 
-df_folder_path = './data/fa_en' # './data/ar_en' # './data/he_en'
+df_folder_path = './data/he_en' # './data/ar_en' # './data/he_en'
 REVERSE_TRANSLATION_DIRECTION = True
 
 DO_TRAIN = True
 DO_EVAL = True
 DO_PREDICT = True
 
-max_input_length = 200 # Max chars in source sentence
-max_target_length = 200 # Max chars in target sentence
+max_input_length = 350 # Max chars in source sentence
+max_target_length = 350 # Max chars in target sentence
 
 #wandb.login()
 # start a new wandb run to track this script
