@@ -10,3 +10,4 @@ transformers == 4.35.2
 nltk == 3.8.1
 tinydb == 4.8.0
 xlsxwriter
+git+https://github.com/dekelcohen/python-mwxml.git@master
