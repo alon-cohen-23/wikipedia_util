@@ -1,0 +1,1 @@
+model_name_or_path=./output_models/nllb-200-distilled-600M_heb_eng_v3_sci_articles/checkpoint-735982

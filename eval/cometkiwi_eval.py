@@ -101,10 +101,10 @@ def predict(tokenizer, model ,df_samp, col_src, dst_lang="eng_Latn", batch_size 
 
 def main(model_name_or_path, test_df_path = './data/validation.parquet', max_samples = 4000):     
     # make predictions (translations)
-    src_lang= "pes_Arab" # "arb_Arab" # "heb_Hebr"
-    col_src= ['translation','he'] # 'HE_sentences'
-    col_dst='pred'
-    dst_lang="eng_Latn"
+    src_lang= "eng_Latn" # "pes_Arab" # "arb_Arab" # "heb_Hebr"
+    col_src= ['translation','en'] # ['translation','he'] # 'HE_sentences'
+    col_dst= 'pred'
+    dst_lang= "heb_Hebr" # "eng_Latn" 
     model = AutoModelForSeq2SeqLM.from_pretrained(model_name_or_path, torch_dtype=torch.float16).to(device)
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, src_lang=src_lang)
     model = model.to_bettertransformer()
@@ -121,7 +121,7 @@ def main(model_name_or_path, test_df_path = './data/validation.parquet', max_sam
     # login to huggingface in order to download comet model
     # hf_login(access_token) # get token from https://colab.research.google.com/drive/1ULigrTC9ppf2pc0a1-D6cewx0aOGGTkX#scrollTo=hhxqbEN_9FkW
    
-    comet_model_name = 'Unbabel/wmt22-cometkiwi-da' #'Unbabel/wmt23-cometkiwi-da-xl'
+    comet_model_name = 'Unbabel/wmt23-cometkiwi-da-xl' # 'Unbabel/wmt22-cometkiwi-da' 
     comet_model_path = download_model(comet_model_name)
     comet_model = load_from_checkpoint(comet_model_path)
     # TODO:HIGH:Restore: col_dst='pred' or col_dst=['translation']['en']
@@ -141,6 +141,7 @@ def main(model_name_or_path, test_df_path = './data/validation.parquet', max_sam
     with open("./temp/model_training_metadata.txt", "w") as file:
         # Write the string into the file
         file.write(f'model_name_or_path={model_name_or_path}')
+        file.write(f'comet_model_name={comet_model_name}')        
     return df_samp
     
 if __name__ == "__main__":    
@@ -148,5 +149,8 @@ if __name__ == "__main__":
     model_name_or_path_600 = 'output_models/nllb-200-distilled-600M_arb_eng_telegram_v2/checkpoint-209856'
     model_name_or_path_600_he_en = './nllb-200-distilled-600M_heb_eng/checkpoint-172058'
     model_name_or_path_600_fa_en_wikipedia = './output_models/nllb-200-distilled-600M_pes_eng/checkpoint-124185'
-    df_samp = main(model_name_or_path = model_name_or_path_600_fa_en_wikipedia) # 'output_models/nllb-200-distilled-600M_heb_eng/checkpoint-172058/'
+    model_name_or_path_600_fa_en_v2_wikipedia_articles = './output_models/nllb-200-distilled-600M_pes_eng_v2_articles/checkpoint-126870'
+    model_name_or_path_600_heb_eng_v3_sci_articles = './output_models/nllb-200-distilled-600M_heb_eng_v3_sci_articles/checkpoint-735982'
+    
+    df_samp = main(model_name_or_path = model_name_or_path_600_heb_eng_v3_sci_articles) # 'output_models/nllb-200-distilled-600M_heb_eng/checkpoint-172058/'
                    
